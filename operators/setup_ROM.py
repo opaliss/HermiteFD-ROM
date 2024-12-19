@@ -6,7 +6,7 @@ import scipy
 
 
 class SimulationSetupROM:
-    def __init__(self, Nx, Nx_total, Nv, epsilon, alpha_e, alpha_i, u_e, u_i, L, dt, T0, T, nu,
+    def __init__(self, Nx, Nv, epsilon, alpha_e, alpha_i, u_e, u_i, L, dt, T0, T, nu,
                  M, Nr, Ur_e, Ur_i, problem_dir, m_e=1, m_i=1836, q_e=-1, q_i=1, construct=True):
         # set up configuration parameters
         # resolution in space
