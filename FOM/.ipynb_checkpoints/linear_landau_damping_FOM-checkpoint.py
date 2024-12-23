@@ -1,4 +1,4 @@
-"""Module to run the adaptive (or non-adaptive) Hermite linear Landau damping full-order model (FOM) testcase
+"""Module to run the adaptive (or non-adaptive) Hermite linear_landau Landau damping full-order model (FOM) testcase
 
 Author: Opal Issan
 Date: May 10th, 2024

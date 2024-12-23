@@ -1,4 +1,4 @@
-"""Module to run the adaptive (or non-adaptive) Hermite linear Landau damping full-order model (FOM) testcase
+"""Module to run the adaptive (or non-adaptive) Hermite linear_landau Landau damping full-order model (FOM) testcase
 
 Author: Opal Issan
 Date: Dec 22nd, 2024
@@ -42,7 +42,7 @@ def rhs(y):
 
 
 if __name__ == "__main__":
-    for k_ in [0.5, 0.6, 0.7, 0.8, 0.9, 1]:
+    for k_ in [0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]:
         setup = SimulationSetupFOM(Nx=300,
                                    Nv=100,
                                    epsilon=1e-2,
@@ -54,7 +54,7 @@ if __name__ == "__main__":
                                    dt=1e-2,
                                    T0=0,
                                    T=20,
-                                   nu=20)
+                                   nu=10)
 
         # initial condition: read in result from previous simulation
         y0 = np.zeros(setup.Nv * setup.Nx)
@@ -71,8 +71,8 @@ if __name__ == "__main__":
         # integrate (implicit midpoint)
         sol_midpoint_u, setup = implicit_midpoint_solver_FOM(y_0=y0,
                                                              right_hand_side=rhs,
-                                                             r_tol=1e-8,
                                                              a_tol=1e-8,
+                                                             r_tol=1e-4,
                                                              max_iter=100,
                                                              param=setup)
 

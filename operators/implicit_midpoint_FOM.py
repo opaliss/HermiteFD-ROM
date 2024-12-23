@@ -4,7 +4,7 @@ Authors: Opal Issan (oissan@ucsd.edu)
 Version: Dec 18th, 2024
 """
 import numpy as np
-import scipy.optimize
+from scipy.optimize import newton_krylov
 import scipy
 
 
@@ -20,7 +20,7 @@ def implicit_nonlinear_equation(y_new, y_old, dt, right_hand_side):
     return y_new - y_old - dt * right_hand_side(y=0.5 * (y_old + y_new))
 
 
-def implicit_midpoint_solver_FOM(y_0, right_hand_side, param, r_tol=1e-8, a_tol=1e-15, max_iter=100):
+def implicit_midpoint_solver_FOM(y_0, right_hand_side, param, r_tol=1e-5, a_tol=1e-8, max_iter=100):
     """Solve the system
 
         dy/dt = rhs(y),    y(0) = y0,
@@ -33,7 +33,7 @@ def implicit_midpoint_solver_FOM(y_0, right_hand_side, param, r_tol=1e-8, a_tol=
     ----------
     :param param: object of SimulationSetup with all the simulation setup parameters
     :param max_iter: maximum iterations of nonlinear solver, default is 100
-    :param a_tol: absolute tolerance nonlinear solver, default is 1e-15
+    :param a_tol: absolute tolerance nonlinear solver, default is 1e-8
     :param r_tol: relative tolerance nonlinear solver, default is 1e-8
     :param y_0: initial condition
     :param adaptive: boolean
@@ -54,13 +54,13 @@ def implicit_midpoint_solver_FOM(y_0, right_hand_side, param, r_tol=1e-8, a_tol=
     for tt in range(1, len(param.t_vec)):
         # print out the current time stamp
         print("\n time = ", param.t_vec[tt])
-        y_sol[:, tt] = scipy.optimize.newton_krylov(F=lambda y: implicit_nonlinear_equation(y_new=y,
+        y_sol[:, tt] = newton_krylov(F=lambda y: implicit_nonlinear_equation(y_new=y,
                                                                                             y_old=y_sol[:, tt - 1],
                                                                                             right_hand_side=right_hand_side,
                                                                                             dt=param.dt),
                                                     xin=y_sol[:, tt - 1],
                                                     maxiter=max_iter,
-                                                    method='gmres',
+                                                    method='lgmres',
                                                     f_tol=a_tol,
                                                     f_rtol=r_tol,
                                                     verbose=True)
