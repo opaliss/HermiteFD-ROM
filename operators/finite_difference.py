@@ -3,7 +3,7 @@
 Authors: Opal Issan (oissan@ucsd.edu)
 Version: Dec 18th, 2024
 """
-from scipy.sparse import diags
+from scipy.sparse import diags, csr_matrix
 
 
 def ddx_fwd(Nx, dx, periodic=True, order=1):
@@ -54,7 +54,7 @@ def ddx_fwd(Nx, dx, periodic=True, order=1):
             A[-2, -1] = 1 / 2
             A[-2, -2] = -1 / 2
         A /= dx
-        return A
+        return csr_matrix(A)
     else:
         return None
 
@@ -92,7 +92,7 @@ def ddx_bwd(Nx, dx, periodic=True, order=1):
             A[-1, -1] = 1
             A[-1, -2] = -1
         A /= dx
-        return A
+        return csr_matrix(A)
     else:
         return None
 
@@ -132,7 +132,7 @@ def ddx_central(Nx, dx, periodic=True, order=2):
             A[-1, -2] = -4
             A[-1, -3] = 1
         A /= (2 * dx)
-        return A
+        return csr_matrix(A)
     elif order == 4:
         A = diags(diagonals=[1 / 12, -2 / 3, 2 / 3, -1 / 12], offsets=[-2, -1, 1, 2], shape=(Nx, Nx)).toarray()
         if periodic:
@@ -143,7 +143,7 @@ def ddx_central(Nx, dx, periodic=True, order=2):
             A[-1, 0] = 2 / 3
             A[-2, 0] = -1 / 12
         A /= dx
-        return A
+        return csr_matrix(A)
     elif order == 6:
         A = diags(diagonals=[-1 / 60, 3 / 20, -3 / 4, 3 / 4, -3 / 20, 1 / 60], offsets=[-3, -2, -1, 1, 2, 3],
                   shape=(Nx, Nx)).toarray()
@@ -161,7 +161,7 @@ def ddx_central(Nx, dx, periodic=True, order=2):
             A[-2, 0] = -3 / 20
             A[-1, 0] = 3 / 4
         A /= dx
-        return A
+        return csr_matrix(A)
     else:
         return None
 
@@ -212,7 +212,7 @@ def d2dx2_central(Nx, dx=0, periodic=True, order=2):
             A[-1, -3] = 4 / dx
             A[-1, -4] = -1 / dx
         A /= (dx ** 2)
-        return A
+        return csr_matrix(A)
     # fourth-order accurate central finite differencing of second-order derivative
     elif order == 4:
         A = diags([-1, 16, -30, 16, -1], [-2, -1, 0, 1, 2], shape=(Nx, Nx)).toarray()
@@ -225,6 +225,6 @@ def d2dx2_central(Nx, dx=0, periodic=True, order=2):
             A[-2, 0] = -1
         if dx != 0:
             A /= 12 * (dx ** 2)
-        return A
+        return csr_matrix(A)
     else:
         return None

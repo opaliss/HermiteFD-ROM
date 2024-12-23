@@ -1,5 +1,5 @@
 import numpy as np
-from operators.FOM import A1, A2, A3, B
+from operators.FOM import A1, A2, A3
 from operators.finite_difference import ddx_central
 
 
@@ -21,6 +21,7 @@ class SimulationSetupFOM:
         self.u_i = u_i
         # x grid is from 0 to L
         self.L = L
+        self.dx = self.L / self.Nx
         # time stepping delta t
         self.dt = dt
         # final time
@@ -40,7 +41,7 @@ class SimulationSetupFOM:
 
         # matrices
         # Fourier derivative matrix
-        self.D = ddx_central(Nx=Nx+1, dx=L/Nx, periodic=True, order=2)
+        self.D = ddx_central(Nx=self.Nx+1, dx=self.dx, periodic=True, order=2)
 
         # matrix of coefficients (advection)
         A_diag = A2(D=self.D, i=0, j=self.Nv)
@@ -51,8 +52,4 @@ class SimulationSetupFOM:
         if ions:
             self.A_i = self.alpha_i * A_off + self.u_i * A_diag + self.nu * A_col
 
-        # matrix of coefficient (acceleration)
-        self.B_e = (self.q_e / (self.m_e * self.alpha_e)) * B(Nx=self.Nx, i=0, j=self.Nv)
-        if ions:
-            self.B_i = (self.q_i / (self.m_i * self.alpha_i)) * B(Nx=self.Nx, i=0, j=self.Nv)
 

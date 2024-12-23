@@ -67,7 +67,7 @@ def A2(D, i, j):
     :param D: finite difference derivative matrix
     :return: 2D matrix, A3 matrix in linear advection term
     """
-    return -scipy.sparse.kron(np.sparse.identity(n=j-i), D, format="csr")
+    return -scipy.sparse.kron(scipy.sparse.identity(n=j-i), D, format="csr")
 
 
 def A1(i, j, D):
@@ -87,6 +87,25 @@ def A1(i, j, D):
             # upper diagonal
             A[index, index + 1] = np.sqrt((n + 1) / 2)
     return -scipy.sparse.kron(A, D, format="csr")
+
+
+def nonlinear_full(E, psi, q, m, alpha, Nv, Nx):
+    """
+
+    :param E: vec size Nx, electric field on finite difference mesh
+    :param psi: vec size Nx*Nv, vector of all coefficients
+    :param q: float, charge of particles
+    :param m: float, mass of particles
+    :param alpha: float, temperature of particles
+    :param Nx: int, grid size in space
+    :param Nv: int, spectral resolution in velocity
+    :return: N(E, psi)
+    """
+    res = np.zeros(len(psi))
+    for n in range(Nv):
+        if n != 0:
+            res[n*Nx: (n+1)*Nx] = q/m/alpha * np.sqrt(2*n) * E * psi[(n-1)*Nx: n*Nx]
+    return res
 
 
 def B(Nx, i, j):
@@ -113,6 +132,92 @@ def Q(Nx, j, i):
     :param i: 0th index
     :return: 2D matrix, Q matrix of acceleration term
     """
-    mat1 = scipy.sparse.identity(n=(j-i)*Nx)
-    mat2 = scipy.sparse.kron(np.ones((j-i, 1)), scipy.sparse.identity(n=Nx))
+    mat1 = np.identity(n=(j-i)*Nx)
+    mat2 = np.kron(np.ones((j-i, 1)), np.identity(n=Nx))
     return scipy.linalg.khatri_rao(mat1.T, mat2.T).T
+
+
+def charge_density(q_e, q_i, alpha_e, alpha_i, C0_e, C0_i):
+    """
+
+    :param q_e:
+    :param q_i:
+    :param alpha_e:
+    :param alpha_i:
+    :param C0_e:
+    :param C0_i:
+    :return:
+    """
+    return q_e * alpha_e * C0_e + q_i * alpha_i * C0_i
+
+
+def mass(state):
+    """mass of the particular state
+
+    :param state: ndarray, electron or ion state
+    :return: mass for the state
+    """
+    return np.sum(state[0, :])
+
+
+def momentum(state, u_s, alpha_s):
+    """momentum of the particular state
+
+    :param state: ndarray, electron or ion state
+    :param u_s: float, the velocity shifting parameter of species s
+    :param alpha_s: float, the velocity scaling parameter of species s
+    :return: momentum for the state
+    """
+    return alpha_s * np.sum(state[1, :])/np.sqrt(2) + u_s * np.sum(state[0, :])
+
+
+def energy_k(state, u_s, alpha_s):
+    """kinetic energy of the particular state
+
+    :param state: ndarray, electron or ion state
+    :param u_s: float, the velocity shifting parameter of species s
+    :param alpha_s: float, the velocity scaling parameter of species s
+    :return: kinetic energy for the state
+    """
+    return (alpha_s**2) / np.sqrt(2) * np.sum(state[2, :]) \
+           + np.sqrt(2) * u_s * alpha_s * np.sum(state[1, :])\
+           + (alpha_s**2/2 + u_s**2) * np.sum(state[0, :])
+
+
+def total_mass(state, alpha_s, dx):
+    """total mass of single electron and ion setup
+
+    :param state: ndarray, species s state
+    :param alpha_s: float, velocity scaling of species s
+    :param dx: float, spatial spacing
+    :return: total mass of single electron and ion setup
+    """
+    return mass(state=state) * dx * alpha_s
+
+
+def total_momentum(state, alpha_s, dx, m_s, u_s):
+    """total momentum of single electron and ion setup
+
+    :param state: ndarray, species s state
+    :param alpha_s: float, velocity scaling of species s
+    :param dx: float, spatial spacing
+    :param Nv: int, the number of velocity spectral terms
+    :param m_s: float, mass of species s
+    :param u_s: float, velocity shifting parameter of species s
+    :return: total momentum of single electron and ion setup
+    """
+    return momentum(state=state, alpha_s=alpha_s, u_s=u_s) * dx * alpha_s * m_s
+
+
+def total_energy_k(state, alpha_s, dx,  m_s, u_s):
+    """total kinetic energy of single electron and ion setup
+
+    :param state: ndarray, species s  state
+    :param alpha_s: float, velocity scaling of species s
+    :param dx: float, spatial spacing
+    :param m_s: float, mass of species s
+    :param u_s: float, velocity shifting parameter of species s
+    :return: total kinetic energy of single electron and ion setup
+    """
+    return 0.5 * energy_k(state=state, alpha_s=alpha_s, u_s=u_s) * dx * alpha_s * m_s
+

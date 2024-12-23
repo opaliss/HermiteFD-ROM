@@ -47,7 +47,7 @@ def implicit_midpoint_solver_FOM(y_0, right_hand_side, param, r_tol=1e-8, a_tol=
 
     """
     # initialize the solution matrix
-    y_sol = np.zeros((len(y_0), len(param.t_vec)), dtype="complex128")
+    y_sol = np.zeros((len(y_0), len(param.t_vec)))
     y_sol[:, 0] = y_0
 
     # for-loop each time-step
