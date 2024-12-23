@@ -10,7 +10,7 @@ sys.path.append(os.path.abspath(os.path.join('..')))
 from operators.FOM import nonlinear_full, charge_density
 from operators.implicit_midpoint_FOM import implicit_midpoint_solver_FOM
 from operators.setup_FOM import SimulationSetupFOM
-from operators.poisson_solver import fft_solver, gmres_solver, fft_solver_Ax_b
+from operators.poisson_solver import gmres_solver
 import time
 import numpy as np
 import matplotlib
