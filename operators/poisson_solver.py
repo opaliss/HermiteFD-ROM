@@ -4,19 +4,20 @@ Author: Opal Issan (oissan@ucsd.edu)
 Last Update: Nov 20th, 2023
 """
 from scipy.sparse import csc_matrix
-from scipy.sparse.linalg import gmres, lgmres, cg
+from scipy.sparse.linalg import lgmres
 import numpy as np
 
 
-def gmres_solver(rhs, D):
+def gmres_solver(rhs, D, atol=1e-8, rtol=1e-8):
     """Poisson solver using an iterative solver: GMRES
 
+    :param atol: float, lgmres absolute error tolerance (default is 1e-10)
+    :param rtol: float, lgmres relative error tolerance (default is 1e-8)
     :param D: derivative matrix
     :param rhs: array, rhs of the equation (poisson)
     :return: E that satisfies d/dx E = rho or d^2/dx^2 phi = rho
     """
-    x, _ = lgmres(D, rhs - np.mean(rhs), atol=1e-8, tol=1e-8)
-    # print("charge neutrality = ", np.mean(rhs))
+    x, _ = lgmres(D, rhs - np.mean(rhs), atol=atol, rtol=rtol)
     return x - np.mean(x)
 
 

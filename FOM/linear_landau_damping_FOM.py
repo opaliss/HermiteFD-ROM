@@ -21,13 +21,13 @@ import matplotlib.pyplot as plt
 
 def rhs(y):
     # electric field computed
-    rho = charge_density(alpha_e=setup.alpha_e, alpha_i=setup.alpha_i,
-                         q_e=setup.q_e, q_i=setup.q_i,
+    rho = charge_density(alpha_e=setup.alpha_e,
+                         alpha_i=setup.alpha_i,
+                         q_e=setup.q_e,
+                         q_i=setup.q_i,
                          C0_e=y[:setup.Nx],
                          C0_i=C0_ions)
 
-    # E = fft_solver(rhs=rho, L=setup.L)
-    # E = fft_solver_Ax_b(rhs=rho, D=setup.D, dx=setup.dx)
     E = gmres_solver(rhs=rho, D=setup.D)
     # print("residual = ", np.mean(np.abs(setup.D @ E - rho)))
 
@@ -42,8 +42,8 @@ def rhs(y):
 
 
 if __name__ == "__main__":
-    for k_ in [0.6, 0.7, 0.8, 0.9, 1]:
-        setup = SimulationSetupFOM(Nx=100,
+    for k_ in [0.5, 0.6, 0.7, 0.8, 0.9, 1]:
+        setup = SimulationSetupFOM(Nx=300,
                                    Nv=100,
                                    epsilon=1e-2,
                                    alpha_e=np.sqrt(2),
@@ -54,7 +54,7 @@ if __name__ == "__main__":
                                    dt=1e-2,
                                    T0=0,
                                    T=20,
-                                   nu=10)
+                                   nu=20)
 
         # initial condition: read in result from previous simulation
         y0 = np.zeros(setup.Nv * setup.Nx)
