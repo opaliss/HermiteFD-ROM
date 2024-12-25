@@ -38,7 +38,7 @@ def rhs(y):
 
 
 if __name__ == "__main__":
-    k_ = 0.6
+    k_ = 0.7
     setup = SimulationSetupROM(Nx=150,
                                Nv=100,
                                epsilon=1e-2,
@@ -51,19 +51,19 @@ if __name__ == "__main__":
                                T0=0,
                                T=20,
                                nu=10,
-                               Nr=10,
+                               Nr=50,
                                M=3,
                                problem_dir="linear_landau",
                                Ur_e=np.load("../data/ROM/linear_landau/basis_3.npy"),
                                construct=True,
                                ions=False)
     # save the reduced operators
-    setup.save_operators()
+    # setup.save_operators()
 
     # initial condition: read in result from previous simulation
     y0 = np.zeros(setup.NF + setup.Nr)
     # first electron 1 species (perturbed)
-    y0[:setup.Nx] = 1 + setup.epsilon * np.cos(k_ * np.linspace(0, setup.L, setup.Nx, endpoint=False)) / setup.alpha_e
+    y0[:setup.Nx] = (1 + setup.epsilon * np.cos(k_ * np.linspace(0, setup.L, setup.Nx, endpoint=False))) / setup.alpha_e
     # ions (unperturbed)
     C0_ions = np.ones(setup.Nx) / setup.alpha_i
 

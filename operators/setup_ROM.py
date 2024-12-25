@@ -65,7 +65,6 @@ class SimulationSetupROM:
     def save_operators(self):
         # save advection matrices
         # kinetic
-        print("here")
         np.save("../data/ROM/" + str(self.problem_dir) + "/operators/A_K_e_M_" + str(self.M) + "_Nr_" + str(
             self.Nr) + "_" + str(self.T0) + "_" + str(self.T) + ".npy", self.A_K_e)
         if self.ions:
