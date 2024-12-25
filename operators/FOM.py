@@ -121,7 +121,8 @@ def B(Nx, i, j):
         # lower diagonal
         if index >= 1:
             B[index, index - 1] = np.sqrt(2 * n)
-    return scipy.sparse.kron(B, scipy.sparse.identity(Nx), format="csr") @ Q(Nx=Nx, j=j, i=i)
+    Q_mat = Q(Nx=Nx, j=j, i=i)
+    return scipy.sparse.kron(scipy.sparse.csr_matrix(B), scipy.sparse.identity(n=Nx), format="csr") @ Q_mat
 
 
 def Q(Nx, j, i):
@@ -132,9 +133,16 @@ def Q(Nx, j, i):
     :param i: 0th index
     :return: 2D matrix, Q matrix of acceleration term
     """
-    mat1 = np.identity(n=(j-i)*Nx)
-    mat2 = np.kron(np.ones((j-i, 1)), np.identity(n=Nx))
-    return scipy.linalg.khatri_rao(mat1.T, mat2.T).T
+    mat1 = scipy.sparse.identity(n=(j-i)*Nx, format="csr")
+    mat2 = scipy.sparse.kron(np.ones((j-i, 1)), scipy.sparse.identity(n=Nx, format="csr"), format="csr")
+    return khatri_rao(mat1.T, mat2.T).T
+
+
+def khatri_rao(mat1, mat2):
+    mat = scipy.sparse.kron(mat1[:, 0], mat2[:, 0], format="csr")
+    for k in range(1, mat2.shape[1]):
+        mat = scipy.sparse.hstack([mat, scipy.sparse.kron(mat1[:, k], mat2[:, k], format="csr")], format="csr")
+    return mat
 
 
 def charge_density(q_e, q_i, alpha_e, alpha_i, C0_e, C0_i):

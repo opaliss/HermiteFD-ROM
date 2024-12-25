@@ -43,7 +43,7 @@ def rhs(y):
 
 if __name__ == "__main__":
     for k_ in [0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]:
-        setup = SimulationSetupFOM(Nx=300,
+        setup = SimulationSetupFOM(Nx=150,
                                    Nv=100,
                                    epsilon=1e-2,
                                    alpha_e=np.sqrt(2),
