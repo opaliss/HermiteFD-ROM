@@ -1,7 +1,7 @@
 """Module to run the linear Landau damping reduced-order model (ROM) testcase
 
 Author: Opal Issan
-Date: Dec 23rd, 2024
+Date: Dec 26th, 2024
 """
 import sys, os
 sys.path.append(os.path.abspath(os.path.join('..')))
@@ -11,6 +11,9 @@ from operators.implicit_midpoint_ROM_two_stream import implicit_midpoint_solver_
 from operators.setup_ROM import SimulationSetupROM
 from operators.poisson_solver import gmres_solver
 import time
+# import matplotlib as mpl
+# mpl.use("Qt5Agg")
+# import matplotlib.pyplot as plt
 
 
 def rhs(y):
@@ -32,33 +35,33 @@ def rhs(y):
     dydt_[setup.NF:] = setup.A_K_e @ y[setup.NF:] \
                        + setup.B_K_e @ np.kron(y[setup.NF:], E) \
                        + setup.G_K_e @ y[: setup.NF] \
-                       + setup.J_K_e @ (E * y[setup.NF - setup.Nx: setup.NF])
+                       + setup.J_K_e @ (y[setup.NF - setup.Nx: setup.NF] * E)
 
     return dydt_
 
 
 if __name__ == "__main__":
-    k_ = 0.7
-    setup = SimulationSetupROM(Nx=150,
-                               Nv=100,
+    k_ = 0.5
+    setup = SimulationSetupROM(Nx=100,
+                               Nv=20,
                                epsilon=1e-2,
                                alpha_e=np.sqrt(2),
                                alpha_i=np.sqrt(2 / 1836),
                                u_e=0,
                                u_i=0,
                                L=20 * np.pi,
-                               dt=0.01,
+                               dt=1e-1,
                                T0=0,
                                T=20,
                                nu=10,
-                               Nr=50,
+                               Nr=100,
                                M=3,
                                problem_dir="linear_landau",
                                Ur_e=np.load("../data/ROM/linear_landau/basis_3.npy"),
                                construct=True,
                                ions=False)
     # save the reduced operators
-    # setup.save_operators()
+    setup.save_operators()
 
     # initial condition: read in result from previous simulation
     y0 = np.zeros(setup.NF + setup.Nr)
@@ -74,12 +77,12 @@ if __name__ == "__main__":
     # integrate (implicit midpoint)
     sol_midpoint_u = implicit_midpoint_solver_ROM(y_0=y0,
                                                    right_hand_side=rhs,
-                                                   r_tol=1e-7,
-                                                   a_tol=1e-7,
+                                                   r_tol=1e-5,
+                                                   a_tol=1e-8,
                                                    max_iter=100,
                                                    setup=setup,
                                                    t_vec=np.linspace(setup.T0, setup.T, int(int(setup.T-setup.T0)/setup.dt)+1),
-                                                   Nw=1)
+                                                   windowing=False)
 
     end_time_cpu = time.process_time() - start_time_cpu
     end_time_wall = time.time() - start_time_wall

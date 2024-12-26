@@ -135,7 +135,8 @@ def Q(Nx, j, i):
     """
     mat1 = scipy.sparse.identity(n=(j-i)*Nx, format="csr")
     mat2 = scipy.sparse.kron(np.ones((j-i, 1)), scipy.sparse.identity(n=Nx, format="csr"), format="csr")
-    return khatri_rao(mat1.T, mat2.T).T
+    # return khatri_rao(mat1.T, mat2.T).T
+    return scipy.sparse.csr_matrix(scipy.linalg.khatri_rao(mat1.toarray().T, mat2.toarray().T).T)
 
 
 def khatri_rao(mat1, mat2):

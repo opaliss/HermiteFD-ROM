@@ -1,11 +1,11 @@
 import numpy as np
-from operators.FOM import A1, A2, A3
+from operators.FOM import A1, A2, A3, B
 from operators.finite_difference import ddx_central
-
+import scipy
 
 class SimulationSetupFOM:
     def __init__(self, Nx, Nv, epsilon, alpha_e, alpha_i, u_e, u_i, L, dt, T0, T, nu,
-                 m_e=1, m_i=1836, q_e=-1, q_i=1, ions=False):
+                 m_e=1, m_i=1836, q_e=-1, q_i=1, ions=False, problem_dir=None):
         # set up configuration parameters
         # spatial resolution
         self.Nx = Nx
@@ -38,6 +38,8 @@ class SimulationSetupFOM:
         self.q_i = q_i
         # artificial collisional frequency
         self.nu = nu
+        #
+        self.problem_dir = problem_dir
 
         # matrices
         # Fourier derivative matrix
@@ -51,5 +53,7 @@ class SimulationSetupFOM:
         self.A_e = self.alpha_e * A_off + self.u_e * A_diag + self.nu * A_col
         if ions:
             self.A_i = self.alpha_i * A_off + self.u_i * A_diag + self.nu * A_col
+
+        self.B_e = self.q_e/self.m_e/self.alpha_e * B(Nx=self.Nx, i=0, j=self.Nv)
 
 
