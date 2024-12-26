@@ -1,8 +1,24 @@
 import numpy as np
-from operators.FOM import A1, A2, A3, B, Q
+from operators.FOM import A1, A2, A3, B
 from operators.finite_difference import ddx_central
 from operators.ROM import theta_matrix, xi_matrix
 import scipy
+
+
+def get_kinetic_reduced_A_matrix(A, Ur):
+    return Ur.T @ A @ Ur
+
+
+def get_kinetic_reduced_B_matrix(B, Ur, Nx):
+    return Ur.T @ B @ scipy.sparse.kron(Ur, scipy.sparse.identity(n=Nx, format="csr"), format="bsr")
+
+
+def get_fluid_reduced_G_matrix(G, Ur):
+    return scipy.sparse.csr_matrix(G @ Ur)
+
+
+def get_kinetic_reduced_G_matrix(G, Ur):
+    return scipy.sparse.csr_matrix(Ur.T @ G)
 
 
 class SimulationSetupROM:
@@ -32,6 +48,7 @@ class SimulationSetupROM:
         self.T = T
         # initial start
         self.T0 = T0
+        self.t_vec = np.linspace(self.T0, self.T, int((self.T - self.T0) / self.dt) + 1)
         # mass normalized to m_{e}
         self.m_e = m_e
         self.m_i = m_i
@@ -194,22 +211,22 @@ class SimulationSetupROM:
         A_col_K = A3(Nx=self.Nx, Nv=self.Nv, i=self.M, j=self.Nv)
 
         # reduced diagonal A matrix
-        self.A_K_e = self.u_e * self.get_kinetic_reduced_A_matrix(A=A_diag_K, Ur=self.Ur_e) \
-                     + self.alpha_e * self.get_kinetic_reduced_A_matrix(A=A_off_K, Ur=self.Ur_e) \
-                     + self.nu * self.get_kinetic_reduced_A_matrix(A=A_col_K, Ur=self.Ur_e)
+        self.A_K_e = self.u_e * get_kinetic_reduced_A_matrix(A=A_diag_K, Ur=self.Ur_e) \
+                     + self.alpha_e * get_kinetic_reduced_A_matrix(A=A_off_K, Ur=self.Ur_e) \
+                     + self.nu * get_kinetic_reduced_A_matrix(A=A_col_K, Ur=self.Ur_e)
         if self.ions:
-            self.A_K_i = self.u_i * self.get_kinetic_reduced_A_matrix(A=A_diag_K, Ur=self.Ur_i) \
-                         + self.alpha_i * self.get_kinetic_reduced_A_matrix(A=A_off_K, Ur=self.Ur_i) \
-                         + self.nu * self.get_kinetic_reduced_A_matrix(A=A_col_K, Ur=self.Ur_i)
+            self.A_K_i = self.u_i * get_kinetic_reduced_A_matrix(A=A_diag_K, Ur=self.Ur_i) \
+                         + self.alpha_i * get_kinetic_reduced_A_matrix(A=A_off_K, Ur=self.Ur_i) \
+                         + self.nu * get_kinetic_reduced_A_matrix(A=A_col_K, Ur=self.Ur_i)
 
         del A_diag_K, A_col_K, A_off_K
 
         # matrix of coefficient (acceleration)
         B_K = B(Nx=self.Nx, i=self.M, j=self.Nv)
 
-        self.B_K_e = self.q_e / self.m_e / self.alpha_e * self.get_kinetic_reduced_B_matrix(B=B_K, Ur=self.Ur_e, Nx=self.Nx)
+        self.B_K_e = self.q_e / self.m_e / self.alpha_e * get_kinetic_reduced_B_matrix(B=B_K, Ur=self.Ur_e, Nx=self.Nx)
         if self.ions:
-            self.B_K_i = self.q_i / self.m_i / self.alpha_i * self.get_kinetic_reduced_B_matrix(B=B_K, Ur=self.Ur_i, Nx=self.Nx)
+            self.B_K_i = self.q_i / self.m_i / self.alpha_i * get_kinetic_reduced_B_matrix(B=B_K, Ur=self.Ur_i, Nx=self.Nx)
 
         del B_K
 
@@ -217,28 +234,16 @@ class SimulationSetupROM:
         G_F = -np.sqrt(self.M / 2) * xi_matrix(Nx=self.Nx, Nv=self.M) @ self.D @ theta_matrix(Nx=self.Nx, Nv=self.Nv - self.M).T
         upsilon_K = np.sqrt(2 * self.M) * theta_matrix(Nx=self.Nx, Nv=self.Nv - self.M)
 
-        self.G_F_e = self.alpha_e * self.get_fluid_reduced_G_matrix(G=G_F, Ur=self.Ur_e)
+        self.G_F_e = self.alpha_e * get_fluid_reduced_G_matrix(G=G_F, Ur=self.Ur_e)
         if self.ions:
-            self.G_F_i = self.alpha_i * self.get_fluid_reduced_G_matrix(G=G_F, Ur=self.Ur_i)
+            self.G_F_i = self.alpha_i * get_fluid_reduced_G_matrix(G=G_F, Ur=self.Ur_i)
 
-        self.G_K_e = self.alpha_e * self.get_kinetic_reduced_G_matrix(G=-G_F.T, Ur=self.Ur_e)
+        self.G_K_e = self.alpha_e * get_kinetic_reduced_G_matrix(G=-G_F.T, Ur=self.Ur_e)
         if self.ions:
-            self.G_K_i = self.alpha_i * self.get_kinetic_reduced_G_matrix(G=-G_F.T, Ur=self.Ur_i)
+            self.G_K_i = self.alpha_i * get_kinetic_reduced_G_matrix(G=-G_F.T, Ur=self.Ur_i)
 
-        self.J_K_e = self.q_e / self.m_e / self.alpha_e * self.get_kinetic_reduced_G_matrix(G=upsilon_K, Ur=self.Ur_e)
+        self.J_K_e = self.q_e / self.m_e / self.alpha_e * get_kinetic_reduced_G_matrix(G=upsilon_K, Ur=self.Ur_e)
         if self.ions:
-            self.J_K_i = self.q_i / self.m_i / self.alpha_i * self.get_kinetic_reduced_G_matrix(G=upsilon_K, Ur=self.Ur_i)
+            self.J_K_i = self.q_i / self.m_i / self.alpha_i * get_kinetic_reduced_G_matrix(G=upsilon_K, Ur=self.Ur_i)
 
         del G_F, upsilon_K
-
-    def get_kinetic_reduced_A_matrix(self, A, Ur):
-        return Ur.T @ A @ Ur
-
-    def get_kinetic_reduced_B_matrix(self, B, Ur, Nx):
-        return Ur.T @ B @ scipy.sparse.kron(Ur, scipy.sparse.identity(n=Nx, format="csr"), format="bsr")
-
-    def get_fluid_reduced_G_matrix(self, G, Ur):
-        return scipy.sparse.csr_matrix(G @ Ur)
-
-    def get_kinetic_reduced_G_matrix(self, G, Ur):
-        return scipy.sparse.csr_matrix(Ur.T @ G)

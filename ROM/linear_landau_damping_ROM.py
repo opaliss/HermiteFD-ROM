@@ -1,9 +1,10 @@
-"""Module to run the linear Landau damping reduced-order model (ROM) testcase
+"""Module to run the linear_landau Landau damping reduced-order model (ROM) testcase
 
 Author: Opal Issan
 Date: Dec 26th, 2024
 """
 import sys, os
+
 sys.path.append(os.path.abspath(os.path.join('..')))
 import numpy as np
 from operators.FOM import nonlinear_full, charge_density
@@ -11,6 +12,8 @@ from operators.implicit_midpoint_ROM_two_stream import implicit_midpoint_solver_
 from operators.setup_ROM import SimulationSetupROM
 from operators.poisson_solver import gmres_solver
 import time
+
+
 # import matplotlib as mpl
 # mpl.use("Qt5Agg")
 # import matplotlib.pyplot as plt
@@ -19,7 +22,7 @@ import time
 def rhs(y):
     # electric field computed (poisson solver)
     rho = charge_density(alpha_e=setup.alpha_e, alpha_i=setup.alpha_i,
-                         q_e=setup.q_e, q_i=setup.q_i,  C0_e=y[:setup.Nx], C0_i=C0_ions)
+                         q_e=setup.q_e, q_i=setup.q_i, C0_e=y[:setup.Nx], C0_i=C0_ions)
 
     E = gmres_solver(rhs=rho, D=setup.D)
 
@@ -41,8 +44,8 @@ def rhs(y):
 
 
 if __name__ == "__main__":
-    k_ = 0.5
-    setup = SimulationSetupROM(Nx=100,
+    k_ = 0.3
+    setup = SimulationSetupROM(Nx=150,
                                Nv=20,
                                epsilon=1e-2,
                                alpha_e=np.sqrt(2),
@@ -50,9 +53,9 @@ if __name__ == "__main__":
                                u_e=0,
                                u_i=0,
                                L=20 * np.pi,
-                               dt=1e-1,
+                               dt=1e-2,
                                T0=0,
-                               T=20,
+                               T=30,
                                nu=10,
                                Nr=100,
                                M=3,
@@ -60,8 +63,9 @@ if __name__ == "__main__":
                                Ur_e=np.load("../data/ROM/linear_landau/basis_3.npy"),
                                construct=True,
                                ions=False)
+
     # save the reduced operators
-    setup.save_operators()
+    # setup.save_operators()
 
     # initial condition: read in result from previous simulation
     y0 = np.zeros(setup.NF + setup.Nr)
@@ -76,13 +80,13 @@ if __name__ == "__main__":
 
     # integrate (implicit midpoint)
     sol_midpoint_u = implicit_midpoint_solver_ROM(y_0=y0,
-                                                   right_hand_side=rhs,
-                                                   r_tol=1e-5,
-                                                   a_tol=1e-8,
-                                                   max_iter=100,
-                                                   setup=setup,
-                                                   t_vec=np.linspace(setup.T0, setup.T, int(int(setup.T-setup.T0)/setup.dt)+1),
-                                                   windowing=False)
+                                                  right_hand_side=rhs,
+                                                  r_tol=1e-4,
+                                                  a_tol=1e-8,
+                                                  max_iter=100,
+                                                  setup=setup,
+                                                  t_vec=setup.t_vec,
+                                                  windowing=False)
 
     end_time_cpu = time.process_time() - start_time_cpu
     end_time_wall = time.time() - start_time_wall
@@ -94,8 +98,12 @@ if __name__ == "__main__":
     # ROM performance
     print("runtime cpu = ", end_time_cpu)
     print("runtime wall = ", end_time_wall)
-    np.save("../data/ROM/linear_landau/sample_" + str(k_) + "/M" + str(setup.M) + "/sol_midpoint_u_" + str(setup.Nr) + "_nu_" + str(setup.nu) + "_runtime_" + str(setup.T0) + "_" + str(setup.T), np.array([end_time_cpu, end_time_wall]))
+    np.save("../data/ROM/linear_landau/sample_" + str(k_) + "/M" + str(setup.M) + "/sol_midpoint_u_" + str(
+        setup.Nr) + "_nu_" + str(setup.nu) + "_runtime_" + str(setup.T0) + "_" + str(setup.T),
+            np.array([end_time_cpu, end_time_wall]))
 
     # save results
-    np.save("../data/ROM/linear_landau/sample_" + str(k_) + "/M" + str(setup.M) + "/sol_midpoint_u_" + str(setup.Nr) + "_nu_" + str(setup.nu) + "_" + str(setup.T0) + "_" + str(setup.T), sol_midpoint_u)
-    np.save("../data/ROM/linear_landau/sample_" + str(k_) + "/M" + str(setup.M) + "/sol_midpoint_t_" + str(setup.Nr) + "_nu_" + str(setup.nu) + "_" + str(setup.T0) + "_" + str(setup.T), np.linspace(setup.T0, setup.T, int((setup.T-setup.T0)/setup.dt)+1))
+    np.save("../data/ROM/linear_landau/sample_" + str(k_) + "/M" + str(setup.M) + "/sol_midpoint_u_" + str(
+        setup.Nr) + "_nu_" + str(setup.nu) + "_" + str(setup.T0) + "_" + str(setup.T), sol_midpoint_u)
+    np.save("../data/ROM/linear_landau/sample_" + str(k_) + "/M" + str(setup.M) + "/sol_midpoint_t_" + str(
+        setup.Nr) + "_nu_" + str(setup.nu) + "_" + str(setup.T0) + "_" + str(setup.T), setup.t_vec)

@@ -20,16 +20,15 @@ import matplotlib.pyplot as plt
 
 
 def rhs(y):
-    # electric field computed
+    # charge density computed
     rho = charge_density(alpha_e=setup.alpha_e,
                          alpha_i=setup.alpha_i,
                          q_e=setup.q_e,
                          q_i=setup.q_i,
                          C0_e=y[:setup.Nx],
                          C0_i=C0_ions)
-
+    # electric field computed
     E = gmres_solver(rhs=rho, D=setup.D)
-    # print("residual = ", np.mean(np.abs(setup.D @ E - rho)))
 
     # evolving only electrons
     return setup.A_e @ y + nonlinear_full(E=E,
@@ -44,7 +43,7 @@ def rhs(y):
 if __name__ == "__main__":
     for k_ in [0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]:
         setup = SimulationSetupFOM(Nx=150,
-                                   Nv=100,
+                                   Nv=20,
                                    epsilon=1e-2,
                                    alpha_e=np.sqrt(2),
                                    alpha_i=np.sqrt(2 / 1836),
@@ -54,7 +53,8 @@ if __name__ == "__main__":
                                    dt=1e-2,
                                    T0=0,
                                    T=20,
-                                   nu=10)
+                                   nu=10,
+                                   construct_B=True)
 
         # initial condition: read in result from previous simulation
         y0 = np.zeros(setup.Nv * setup.Nx)

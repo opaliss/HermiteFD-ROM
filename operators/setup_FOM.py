@@ -5,7 +5,7 @@ import scipy
 
 class SimulationSetupFOM:
     def __init__(self, Nx, Nv, epsilon, alpha_e, alpha_i, u_e, u_i, L, dt, T0, T, nu,
-                 m_e=1, m_i=1836, q_e=-1, q_i=1, ions=False, problem_dir=None):
+                 m_e=1, m_i=1836, q_e=-1, q_i=1, ions=False, problem_dir=None, construct_B=False):
         # set up configuration parameters
         # spatial resolution
         self.Nx = Nx
@@ -54,6 +54,9 @@ class SimulationSetupFOM:
         if ions:
             self.A_i = self.alpha_i * A_off + self.u_i * A_diag + self.nu * A_col
 
-        self.B_e = self.q_e/self.m_e/self.alpha_e * B(Nx=self.Nx, i=0, j=self.Nv)
+        if construct_B:
+            self.B_e = self.q_e/self.m_e/self.alpha_e * B(Nx=self.Nx, i=0, j=self.Nv)
+            if ions:
+                self.B_i = self.q_i / self.m_i / self.alpha_i * B(Nx=self.Nx, i=0, j=self.Nv)
 
 
