@@ -14,11 +14,11 @@ def get_kinetic_reduced_B_matrix(B, Ur, Nx):
 
 
 def get_fluid_reduced_G_matrix(G, Ur):
-    return scipy.sparse.csr_matrix(G @ Ur)
+    return G @ Ur
 
 
 def get_kinetic_reduced_G_matrix(G, Ur):
-    return scipy.sparse.csr_matrix(Ur.T @ G)
+    return Ur.T @ G
 
 
 def get_D_inv(Nx, D):
@@ -122,25 +122,25 @@ class SimulationSetupROM:
 
         # G matrix
         # kinetic
-        scipy.sparse.save_npz("../data/ROM/" + str(self.problem_dir) + "/operators/G_K_e_M_" + str(self.M) + "_Nr_" + str(
-            self.Nr) + "_" + str(self.T0) + "_" + str(self.T) + ".npz", self.G_K_e)
+        np.save("../data/ROM/" + str(self.problem_dir) + "/operators/G_K_e_M_" + str(self.M) + "_Nr_" + str(
+            self.Nr) + "_" + str(self.T0) + "_" + str(self.T) + ".npy", self.G_K_e)
         if self.ions:
-            scipy.sparse.save_npz("../data/ROM/" + str(self.problem_dir) + "/operators/G_K_i_M_" + str(self.M) + "_Nr_" + str(
-                self.Nr) + "_" + str(self.T0) + "_" + str(self.T) + ".npz", self.G_K_i)
+            np.save("../data/ROM/" + str(self.problem_dir) + "/operators/G_K_i_M_" + str(self.M) + "_Nr_" + str(
+                self.Nr) + "_" + str(self.T0) + "_" + str(self.T) + ".npy", self.G_K_i)
 
         # fluid
-        scipy.sparse.save_npz("../data/ROM/" + str(self.problem_dir) + "/operators/G_F_e_M_" + str(self.M) + "_Nr_" + str(
-            self.Nr) + "_" + str(self.T0) + "_" + str(self.T) + ".npz", self.G_F_e)
+        np.save("../data/ROM/" + str(self.problem_dir) + "/operators/G_F_e_M_" + str(self.M) + "_Nr_" + str(
+            self.Nr) + "_" + str(self.T0) + "_" + str(self.T) + ".npy", self.G_F_e)
         if self.ions:
-            scipy.sparse.save_npz("../data/ROM/" + str(self.problem_dir) + "/operators/G_F_i_M_" + str(self.M) + "_Nr_" + str(
-                self.Nr) + "_" + str(self.T0) + "_" + str(self.T) + ".npz", self.G_F_i)
+            np.save("../data/ROM/" + str(self.problem_dir) + "/operators/G_F_i_M_" + str(self.M) + "_Nr_" + str(
+                self.Nr) + "_" + str(self.T0) + "_" + str(self.T) + ".npy", self.G_F_i)
 
         # J matrix
-        scipy.sparse.save_npz("../data/ROM/" + str(self.problem_dir) + "/operators/J_K_e_M_" + str(self.M) + "_Nr_" + str(
-            self.Nr) + "_" + str(self.T0) + "_" + str(self.T) + ".npz", self.J_K_e)
+        np.save("../data/ROM/" + str(self.problem_dir) + "/operators/J_K_e_M_" + str(self.M) + "_Nr_" + str(
+            self.Nr) + "_" + str(self.T0) + "_" + str(self.T) + ".npy", self.J_K_e)
         if self.ions:
-            scipy.sparse.save_npz("../data/ROM/" + str(self.problem_dir) + "/operators/J_K_i_M_" + str(self.M) + "_Nr_" + str(
-                self.Nr) + "_" + str(self.T0) + "_" + str(self.T) + ".npz", self.J_K_i)
+            np.save("../data/ROM/" + str(self.problem_dir) + "/operators/J_K_i_M_" + str(self.M) + "_Nr_" + str(
+                self.Nr) + "_" + str(self.T0) + "_" + str(self.T) + ".npy", self.J_K_i)
 
     def load_operators(self):
         # load advection matrices
@@ -175,25 +175,25 @@ class SimulationSetupROM:
 
         # G matrix
         # kinetic
-        self.G_K_e = scipy.sparse.load_npz("../data/ROM/" + str(self.problem_dir) + "/operators/G_K_e_M_" + str(self.M) + "_Nr_" + str(
-                self.Nr) + "_" + str(self.T0) + "_" + str(self.T) + ".npz")
+        self.G_K_e = np.load("../data/ROM/" + str(self.problem_dir) + "/operators/G_K_e_M_" + str(self.M) + "_Nr_" + str(
+                self.Nr) + "_" + str(self.T0) + "_" + str(self.T) + ".npy")
         if self.ions:
-            self.G_K_i = scipy.sparse.load_npz("../data/ROM/" + str(self.problem_dir) + "/operators/G_K_i_M_" + str(self.M) + "_Nr_" + str(
-                    self.Nr) + "_" + str(self.T0) + "_" + str(self.T) + ".npz")
+            self.G_K_i = np.load("../data/ROM/" + str(self.problem_dir) + "/operators/G_K_i_M_" + str(self.M) + "_Nr_" + str(
+                    self.Nr) + "_" + str(self.T0) + "_" + str(self.T) + ".npy")
 
         # fluid
-        self.G_F_e = scipy.sparse.load_npz("../data/ROM/" + str(self.problem_dir) + "/operators/G_F_e_M_" + str(self.M) + "_Nr_" + str(
-                self.Nr) + "_" + str(self.T0) + "_" + str(self.T) + ".npz")
+        self.G_F_e = np.load("../data/ROM/" + str(self.problem_dir) + "/operators/G_F_e_M_" + str(self.M) + "_Nr_" + str(
+                self.Nr) + "_" + str(self.T0) + "_" + str(self.T) + ".npy")
         if self.ions:
-            self.G_F_i = scipy.sparse.load_npz("../data/ROM/" + str(self.problem_dir) + "/operators/G_F_i_M_" + str(self.M) + "_Nr_" + str(
-                    self.Nr) + "_" + str(self.T0) + "_" + str(self.T) + ".npz")
+            self.G_F_i = np.load("../data/ROM/" + str(self.problem_dir) + "/operators/G_F_i_M_" + str(self.M) + "_Nr_" + str(
+                    self.Nr) + "_" + str(self.T0) + "_" + str(self.T) + ".npy")
 
         # J matrix
-        self.J_K_e = scipy.sparse.load_npz("../data/ROM/" + str(self.problem_dir) + "/operators/J_K_e_M_" + str(self.M) + "_Nr_" + str(
-                self.Nr) + "_" + str(self.T0) + "_" + str(self.T) + ".npz")
+        self.J_K_e = np.load("../data/ROM/" + str(self.problem_dir) + "/operators/J_K_e_M_" + str(self.M) + "_Nr_" + str(
+                self.Nr) + "_" + str(self.T0) + "_" + str(self.T) + ".npy")
         if self.ions:
-            self.J_K_i = scipy.sparse.load_npz("../data/ROM/" + str(self.problem_dir) + "/operators/J_K_i_M_" + str(self.M) + "_Nr_" + str(
-                    self.Nr) + "_" + str(self.T0) + "_" + str(self.T) + ".npz")
+            self.J_K_i = np.load("../data/ROM/" + str(self.problem_dir) + "/operators/J_K_i_M_" + str(self.M) + "_Nr_" + str(
+                    self.Nr) + "_" + str(self.T0) + "_" + str(self.T) + ".npy")
 
     def construct_operators(self):
         # fluid matrices

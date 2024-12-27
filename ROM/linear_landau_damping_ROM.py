@@ -14,16 +14,11 @@ from operators.poisson_solver import gmres_solver
 import time
 
 
-# import matplotlib as mpl
-# mpl.use("Qt5Agg")
-# import matplotlib.pyplot as plt
-
-
 def rhs(y):
     # electric field computed (poisson solver)
     rho = charge_density(alpha_e=setup.alpha_e, alpha_i=setup.alpha_i, q_e=setup.q_e, q_i=setup.q_i, C0_e=y[:setup.Nx], C0_i=C0_ions)
 
-    E = gmres_solver(rhs=rho, D=setup.D, D_inv=setup.D_inv, atol=1e-10, rtol=1e-10)
+    E = gmres_solver(rhs=rho, D=setup.D, D_inv=setup.D_inv, atol=1e-12, rtol=1e-12)
 
     # initialize
     dydt_ = np.zeros(len(y))
@@ -45,7 +40,7 @@ if __name__ == "__main__":
     setup = SimulationSetupROM(Nx=151,
                                Nv=20,
                                epsilon=1e-2,
-                               alpha_e=0.75,
+                               alpha_e=0.5,
                                alpha_i=np.sqrt(2 / 1836),
                                u_e=0,
                                u_i=0,
@@ -54,7 +49,7 @@ if __name__ == "__main__":
                                T0=0,
                                T=80,
                                nu=10,
-                               Nr=50,
+                               Nr=10,
                                M=3,
                                problem_dir="linear_landau",
                                Ur_e=np.load("../data/ROM/linear_landau/basis_3.npy"),
@@ -79,8 +74,8 @@ if __name__ == "__main__":
     # integrate (implicit midpoint)
     sol_midpoint_u = implicit_midpoint_solver_ROM(y_0=y0,
                                                   right_hand_side=rhs,
-                                                  r_tol=1e-4,
-                                                  a_tol=1e-8,
+                                                  r_tol=None,
+                                                  a_tol=1e-10,
                                                   max_iter=100,
                                                   setup=setup,
                                                   t_vec=setup.t_vec,

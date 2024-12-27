@@ -42,7 +42,7 @@ def rhs(y):
 
 
 if __name__ == "__main__":
-    for alpha_e in [0.5, 0.75]:
+    for alpha_e in [0.6, 0.7, 0.8, 0.9]:
         setup = SimulationSetupFOM(Nx=151,
                                    Nv=20,
                                    epsilon=1e-2,
@@ -53,7 +53,7 @@ if __name__ == "__main__":
                                    L=2 * np.pi,
                                    dt=1e-2,
                                    T0=0,
-                                   T=80,
+                                   T=10,
                                    nu=10,
                                    construct_B=False)
 
@@ -73,8 +73,8 @@ if __name__ == "__main__":
         # integrate (implicit midpoint)
         sol_midpoint_u, setup = implicit_midpoint_solver_FOM(y_0=y0,
                                                              right_hand_side=rhs,
-                                                             a_tol=1e-8,
-                                                             r_tol=1e-4,
+                                                             a_tol=1e-12,
+                                                             r_tol=None,
                                                              max_iter=100,
                                                              param=setup)
 
