@@ -64,7 +64,7 @@ if __name__ == "__main__":
         y0 = np.zeros(2 * setup.Nv * setup.Nx)
         # first electron 1 species (perturbed)
         x_ = np.linspace(0, setup.L, setup.Nx, endpoint=False)
-        y0[:setup.Nx] = setup.n0_e1 * (1 + setup.epsilon * np.cos(0.3 * x_)) / setup.alpha_e1
+        y0[:setup.Nx] = setup.n0_e1 * (np.ones(setup.Nx) + setup.epsilon * np.cos(0.3 * x_)) / setup.alpha_e1
         # second electron species (unperturbed)
         y0[setup.Nv * setup.Nx: setup.Nv * setup.Nx + setup.Nx] = setup.n0_e2 * np.ones(setup.Nx) / setup.alpha_e2
         # ions (unperturbed + static)

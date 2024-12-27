@@ -2,9 +2,7 @@ import numpy as np
 from operators.FOM import A1, A2, A3, B
 from operators.finite_difference import ddx_central
 from operators.ROM import theta_matrix, xi_matrix
-from setup_ROM import get_kinetic_reduced_A_matrix, \
-    get_kinetic_reduced_B_matrix, get_kinetic_reduced_G_matrix, get_fluid_reduced_G_matrix, get_D_inv
-import scipy
+from operators.setup_ROM import get_kinetic_reduced_A_matrix, get_kinetic_reduced_B_matrix, get_kinetic_reduced_G_matrix, get_fluid_reduced_G_matrix, get_D_inv
 
 
 class SimulationSetupTwoStreamROM:
@@ -37,6 +35,7 @@ class SimulationSetupTwoStreamROM:
         self.T = T
         # initial start
         self.T0 = T0
+        self.t_vec = np.linspace(self.T0, self.T, int((self.T - self.T0)/self.dt) + 1)
         # mass normalized
         self.m_e1 = m_e1
         self.m_e2 = m_e2
