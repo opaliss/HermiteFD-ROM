@@ -74,6 +74,7 @@ class SimulationSetupROM:
         # matrices
         # derivative matrix
         self.D = ddx_central(Nx=self.Nx + 1, dx=self.dx, periodic=True, order=2)
+        self.D_inv = get_D_inv(Nx=self.Nx, D=self.D)
 
         # projection matrices
         self.Ur_e = Ur_e[:, :self.Nr]

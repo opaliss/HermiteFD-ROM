@@ -21,17 +21,15 @@ import time
 
 def rhs(y):
     # electric field computed (poisson solver)
-    rho = charge_density(alpha_e=setup.alpha_e, alpha_i=setup.alpha_i,
-                         q_e=setup.q_e, q_i=setup.q_i, C0_e=y[:setup.Nx], C0_i=C0_ions)
+    rho = charge_density(alpha_e=setup.alpha_e, alpha_i=setup.alpha_i, q_e=setup.q_e, q_i=setup.q_i, C0_e=y[:setup.Nx], C0_i=C0_ions)
 
-    E = gmres_solver(rhs=rho, D=setup.D, atol=1e-8, rtol=1e-8)
+    E = gmres_solver(rhs=rho, D=setup.D, D_inv=setup.D_inv, atol=1e-10, rtol=1e-10)
 
     # initialize
     dydt_ = np.zeros(len(y))
     # solve for the first M fluid coefficient
     dydt_[:setup.NF] = setup.A_F_e @ y[: setup.NF] \
-                       + nonlinear_full(E=E, psi=y[: setup.NF],
-                                        Nx=setup.Nx, Nv=setup.M, alpha=setup.alpha_e, q=setup.q_e, m=setup.m_e) \
+                       + nonlinear_full(E=E, psi=y[: setup.NF], Nx=setup.Nx, Nv=setup.M, alpha=setup.alpha_e, q=setup.q_e, m=setup.m_e) \
                        + setup.G_F_e @ y[setup.NF:]
 
     # evolve the rest (kinetic portion)
@@ -44,7 +42,7 @@ def rhs(y):
 
 
 if __name__ == "__main__":
-    setup = SimulationSetupROM(Nx=150,
+    setup = SimulationSetupROM(Nx=151,
                                Nv=20,
                                epsilon=1e-2,
                                alpha_e=0.75,
