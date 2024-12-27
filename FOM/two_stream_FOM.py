@@ -57,7 +57,8 @@ if __name__ == "__main__":
                                         nu_e1=15,
                                         nu_e2=15,
                                         n0_e1=0.5,
-                                        n0_e2=0.5)
+                                        n0_e2=0.5,
+                                        construct_B=True)
 
     # initial condition: read in result from previous simulation
     y0 = np.zeros(2 * setup.Nv * setup.Nx)
