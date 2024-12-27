@@ -121,11 +121,11 @@ def B(Nx, i, j):
         # lower diagonal
         if index >= 1:
             B[index, index - 1] = np.sqrt(2 * n)
-    Q_mat = Q(Nx=Nx, j=j, i=i)
+    Q_mat = Q(Nx=Nx, j=j, i=i, method="sparse")
     return scipy.sparse.kron(scipy.sparse.csr_matrix(B), scipy.sparse.identity(n=Nx), format="csr") @ Q_mat
 
 
-def Q(Nx, j, i):
+def Q(Nx, j, i, method="sparse"):
     """
 
     :param Nx: int, finite difference resolution
@@ -133,17 +133,55 @@ def Q(Nx, j, i):
     :param i: 0th index
     :return: 2D matrix, Q matrix of acceleration term
     """
-    mat1 = scipy.sparse.identity(n=(j-i)*Nx, format="csr")
-    mat2 = scipy.sparse.kron(np.ones((j-i, 1)), scipy.sparse.identity(n=Nx, format="csr"), format="csr")
-    # return khatri_rao(mat1.T, mat2.T).T
-    return scipy.sparse.csr_matrix(scipy.linalg.khatri_rao(mat1.toarray().T, mat2.toarray().T).T)
+    mat1 = scipy.sparse.identity(n=(j-i)*Nx, format="csr", dtype=int)
+    mat2 = scipy.sparse.kron(np.ones((j-i, 1), dtype=int), scipy.sparse.identity(n=Nx, format="csr", dtype=int), format="csr")
+    if method == "sparse":
+        return khatri_rao(mat1.T, mat2.T, j=j, i=i, Nx=Nx)
+    else:
+        return scipy.sparse.csr_matrix(scipy.linalg.khatri_rao(mat1.toarray().T, mat2.toarray().T).T)
 
 
-def khatri_rao(mat1, mat2):
-    mat = scipy.sparse.kron(mat1[:, 0], mat2[:, 0], format="csr")
-    for k in range(1, mat2.shape[1]):
-        mat = scipy.sparse.hstack([mat, scipy.sparse.kron(mat1[:, k], mat2[:, k], format="csr")], format="csr")
-    return mat
+# def khatri_rao(mat1, mat2, Nx, i, j):
+#     mat = np.empty((Nx*(j-i), Nx*Nx*(j-i)))
+#     for k in range(Nx*(j-i)):
+#         print(k)
+#         mat[k, :] = np.kron(mat1[:, k].toarray(), mat2[:, k].toarray())[:, 0]
+#     return scipy.sparse.csr_matrix(mat)
+
+
+def khatri_rao(mat1, mat2, Nx, i, j):
+    """
+    Compute the Khatri-Rao product of two sparse matrices.
+
+    Parameters:
+        mat1, mat2 : scipy.sparse.csc_matrix or csr_matrix
+            Input sparse matrices with the same number of columns.
+        Nx : int
+            Number of rows in each sub-block.
+        i, j : int
+            Range of blocks to compute.
+
+    Returns:
+        scipy.sparse.csr_matrix
+            Sparse matrix containing the Khatri-Rao product.
+    """
+    # Total number of rows and columns in the output matrix
+    rows = Nx * (j - i)
+    cols = Nx * Nx * (j - i)
+
+    # initialize storage for COO sparse format
+    row_indices = []
+    col_indices = []
+
+    for k in range(Nx * (j - i)):
+        # Compute Kronecker product in sparse format
+        kron_result = scipy.sparse.kron(mat1[:, k], mat2[:, k], format='coo')
+        row_indices.append(k)
+        col_indices.append(kron_result.row[0])
+
+    # create the final sparse matrix
+    result = scipy.sparse.csr_matrix((np.ones(len(col_indices)), (row_indices, col_indices)), shape=(rows, cols))
+    return result
 
 
 def charge_density(q_e, q_i, alpha_e, alpha_i, C0_e, C0_i):
