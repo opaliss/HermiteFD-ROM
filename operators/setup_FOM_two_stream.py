@@ -1,5 +1,6 @@
 import numpy as np
 from operators.FOM import A1, A2, A3, B
+from operators.setup_ROM import get_D_inv
 from operators.finite_difference import ddx_central
 
 
@@ -52,6 +53,7 @@ class SimulationSetupTwoStreamFOM:
         # matrices
         # Fourier derivative matrix
         self.D = ddx_central(Nx=self.Nx+1, dx=self.dx, periodic=True, order=2)
+        self.D_inv = get_D_inv(Nx=self.Nx, D=self.D)
 
         # matrix of coefficients (advection)
         A_diag = A2(D=self.D, i=0, j=self.Nv)

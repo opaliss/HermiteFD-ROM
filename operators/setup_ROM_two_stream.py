@@ -2,17 +2,19 @@ import numpy as np
 from operators.FOM import A1, A2, A3, B
 from operators.finite_difference import ddx_central
 from operators.ROM import theta_matrix, xi_matrix
+from setup_ROM import get_kinetic_reduced_A_matrix, \
+    get_kinetic_reduced_B_matrix, get_kinetic_reduced_G_matrix, get_fluid_reduced_G_matrix, get_D_inv
 import scipy
 
 
 class SimulationSetupTwoStreamROM:
-    def __init__(self, Nx, Nx_total, Nv, epsilon, alpha_e1, alpha_e2, alpha_i, u_e1, u_e2, u_i, L, dt, T0, T, nu,
-                 M, Nr, Ur_e1, Ur_e2, problem_dir, n0_e1, n0_e2,
-                 m_e1=1, m_e2=1, m_i=1836, q_e1=-1, q_e2=-1, q_i=1, construct=True):
+    def __init__(self, Nx, Nv, epsilon, alpha_e1, alpha_e2, alpha_i, u_e1, u_e2, u_i, L, dt, T0, T, nu_e1, nu_e2,
+                 M, Nr, Ur_e1, Ur_e2, problem_dir, n0_e1, n0_e2, m_e1=1, m_e2=1, m_i=1836, q_e1=-1, q_e2=-1, q_i=1,
+                 nu_i=0, construct=True, load=False):
         # set up configuration parameters
-        # resolution in x
+        # grid resolution in x
         self.Nx = Nx
-        # resoltuion in v
+        # spectral resolution in v
         self.Nv = Nv
         # number of spectral expansions
         self.Nv = Nv
@@ -28,6 +30,7 @@ class SimulationSetupTwoStreamROM:
         self.u_i = u_i
         # x grid is from 0 to L
         self.L = L
+        self.dx = self.L / self.Nx
         # time stepping
         self.dt = dt
         # final time
@@ -43,7 +46,9 @@ class SimulationSetupTwoStreamROM:
         self.q_e2 = q_e2
         self.q_i = q_i
         # artificial collisional frequency
-        self.nu = nu
+        self.nu_e1 = nu_e1
+        self.nu_e2 = nu_e2
+        self.nu_i = nu_i
         # dimensionality parameters
         self.M = M
         self.Nr = Nr
@@ -55,7 +60,8 @@ class SimulationSetupTwoStreamROM:
 
         # matrices
         # Fourier derivative matrix
-        self.D = ddx_central(Nx=self.Nx+1, dx=self.L/self.Nx, periodic=True)
+        self.D = ddx_central(Nx=self.Nx+1, dx=self.dx, periodic=True)
+        self.D_inv = get_D_inv(Nx=self.Nx, D=self.D)
 
         # projection matrices
         self.Ur_e1 = Ur_e1[:, :self.Nr]
@@ -66,7 +72,7 @@ class SimulationSetupTwoStreamROM:
 
         if construct:
             self.construct_operators()
-        else:
+        elif load:
             self.load_operators()
 
     def save_operators(self):
@@ -144,12 +150,12 @@ class SimulationSetupTwoStreamROM:
         B_F = B(i=0, j=self.M, Nx=self.Nx)
 
         # affine parameteric operators
-        self.A_F_e1 = self.alpha_e1 * A_off_F + self.u_e1 * A_diag_F + self.nu * A_col_F
-        self.A_F_e2 = self.alpha_e2 * A_off_F + self.u_e2 * A_diag_F + self.nu * A_col_F
+        self.A_F_e1 = self.alpha_e1 * A_off_F + self.u_e1 * A_diag_F + self.nu_e1 * A_col_F
+        self.A_F_e2 = self.alpha_e2 * A_off_F + self.u_e2 * A_diag_F + self.nu_e2 * A_col_F
 
         # matrix of coefficient (acceleration)
-        self.B_F_e1 = (self.q_e1 / (self.m_e1 * self.alpha_e1)) * B_F
-        self.B_F_e2 = (self.q_e2 / (self.m_e2 * self.alpha_e2)) * B_F
+        self.B_F_e1 = self.q_e1 / self.m_e1 / self.alpha_e1 * B_F
+        self.B_F_e2 = self.q_e2 / self.m_e2 / self.alpha_e2 * B_F
 
         # kinetic matrices
         # (general) matrix of coefficients (advection)
@@ -158,48 +164,32 @@ class SimulationSetupTwoStreamROM:
         A_col_K = A3(Nx=self.Nx, Nv=self.Nv, i=self.M, j=self.Nv)
 
         # affine parameteric operators
-        self.A_K_e1 = self.alpha_e1 * self.get_kinetic_reduced_A_matrix(A=A_off_K, Ur=self.Ur_e1) \
-                      + self.u_e1 * self.get_kinetic_reduced_A_matrix(A=A_diag_K, Ur=self.Ur_e1) \
-                      + self.nu * self.get_kinetic_reduced_A_matrix(A=A_col_K, Ur=self.Ur_e1)
+        self.A_K_e1 = self.alpha_e1 * get_kinetic_reduced_A_matrix(A=A_off_K, Ur=self.Ur_e1) \
+                      + self.u_e1 * get_kinetic_reduced_A_matrix(A=A_diag_K, Ur=self.Ur_e1) \
+                      + self.nu_e1 * get_kinetic_reduced_A_matrix(A=A_col_K, Ur=self.Ur_e1)
 
-        self.A_K_e2 = self.alpha_e2 * self.get_kinetic_reduced_A_matrix(A=A_off_K, Ur=self.Ur_e2) \
-                      + self.u_e2 * self.get_kinetic_reduced_A_matrix(A=A_diag_K, Ur=self.Ur_e2) \
-                      + self.nu * self.get_kinetic_reduced_A_matrix(A=A_col_K, Ur=self.Ur_e2)
+        self.A_K_e2 = self.alpha_e2 * get_kinetic_reduced_A_matrix(A=A_off_K, Ur=self.Ur_e2) \
+                      + self.u_e2 * get_kinetic_reduced_A_matrix(A=A_diag_K, Ur=self.Ur_e2) \
+                      + self.nu_e2 * get_kinetic_reduced_A_matrix(A=A_col_K, Ur=self.Ur_e2)
 
         # matrix of coefficient (acceleration)
         # Fourier transform matrix
         B_K = B(i=self.M, j=self.Nv, Nx=self.Nx)
 
-        self.B_K_e1 = (self.q_e1 / (self.m_e1 * self.alpha_e1)) * self.get_kinetic_reduced_B_matrix(B_K=B_K,
-                                                                                                    Ur=self.Ur_e1,
-                                                                                                    Nx=self.Nx)
-        self.B_K_e2 = (self.q_e2 / (self.m_e2 * self.alpha_e2)) * self.get_kinetic_reduced_B_matrix(B_K=B_K,
-                                                                                                    Ur=self.Ur_e2,
-                                                                                                    Nx=self.Nx)
+        self.B_K_e1 = self.q_e1 / self.m_e1 / self.alpha_e1 * get_kinetic_reduced_B_matrix(B=B_K, Ur=self.Ur_e1, Nx=self.Nx)
+        self.B_K_e2 = self.q_e2 / self.m_e2 / self.alpha_e2 * get_kinetic_reduced_B_matrix(B=B_K, Ur=self.Ur_e2, Nx=self.Nx)
 
         # sparse coupling matrices
         G_F = - np.sqrt(self.M / 2) * xi_matrix(Nx=self.Nx, Nv=self.M) @ self.D @ theta_matrix(Nx=self.Nx, Nv=self.Nv - self.M).T
         J_K = np.sqrt(2 * self.M) * theta_matrix(Nx=self.Nx, Nv=self.Nv - self.M)
 
         # affine parametric operators
-        self.G_F_e1 = self.alpha_e1 * self.get_fluid_reduced_G_matrix(G=G_F, Ur=self.Ur_e1)
-        self.G_F_e2 = self.alpha_e2 * self.get_fluid_reduced_G_matrix(G=G_F, Ur=self.Ur_e2)
+        self.G_F_e1 = self.alpha_e1 * get_fluid_reduced_G_matrix(G=G_F, Ur=self.Ur_e1)
+        self.G_F_e2 = self.alpha_e2 * get_fluid_reduced_G_matrix(G=G_F, Ur=self.Ur_e2)
 
-        self.G_K_e1 = self.alpha_e1 * self.get_kinetic_reduced_G_matrix(G=G_F.T, Ur=self.Ur_e1)
-        self.G_K_e2 = self.alpha_e2 * self.get_kinetic_reduced_G_matrix(G=G_F.T, Ur=self.Ur_e2)
+        self.G_K_e1 = self.alpha_e1 * get_kinetic_reduced_G_matrix(G=-G_F.T, Ur=self.Ur_e1)
+        self.G_K_e2 = self.alpha_e2 * get_kinetic_reduced_G_matrix(G=-G_F.T, Ur=self.Ur_e2)
 
-        self.J_K_e1 = (self.q_e1 / (self.m_e1 * self.alpha_e1)) * self.get_kinetic_reduced_G_matrix(G=J_K, Ur=self.Ur_e1)
-        self.J_K_e2 = (self.q_e2 / (self.m_e2 * self.alpha_e2)) * self.get_kinetic_reduced_G_matrix(G=J_K, Ur=self.Ur_e2)
+        self.J_K_e1 = self.q_e1 / self.m_e1 / self.alpha_e1 * get_kinetic_reduced_G_matrix(G=J_K, Ur=self.Ur_e1)
+        self.J_K_e2 = self.q_e2 / self.m_e2 / self.alpha_e2 * get_kinetic_reduced_G_matrix(G=J_K, Ur=self.Ur_e2)
 
-
-    def get_kinetic_reduced_A_matrix(self, A, Ur):
-        return np.conjugate(Ur).T @ A @ Ur
-
-    def get_kinetic_reduced_B_matrix(self, B_K, Ur, Nx):
-        return np.conjugate(Ur).T @ B_K @ scipy.sparse.kron(Ur, scipy.sparse.identity(Nx, format="dia"), format="bsr")
-
-    def get_fluid_reduced_G_matrix(self, G, Ur):
-        return G @ Ur
-
-    def get_kinetic_reduced_G_matrix(self, G, Ur):
-        return np.conjugate(Ur).T @ G

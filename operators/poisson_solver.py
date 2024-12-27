@@ -21,6 +21,17 @@ def gmres_solver(rhs, D, atol=1e-8, rtol=1e-8):
     return x - np.mean(x)
 
 
+def gmres_solver_v2(rhs, D_inv):
+    """Poisson solver
+
+    :param D_inv: derivative matrix
+    :param rhs: array, rhs of the equation (poisson)
+    :return: E that satisfies d/dx E = rho or d^2/dx^2 phi = rho
+    """
+    x_ = D_inv @ np.append(rhs - np.mean(rhs), 0)
+    return x_[:-1] - np.mean(x_[:-1])
+
+
 def fft_solver_Ax_b(rhs, D, dx):
     """Poisson solver using fft of the equations
         A x= b
@@ -64,7 +75,7 @@ def fft_solver(rhs, L):
     x = np.fft.fftshift(x)
     N = len(x)
 
-    for index, k in enumerate(range(-N//2, N//2)):
+    for index, k in enumerate(np.arange(-int(np.floor(N/2)), int(np.floor(N/2)) + 1)):
         if not k == 0:
             x[index] /= 1j*2*np.pi*k/L
         else:

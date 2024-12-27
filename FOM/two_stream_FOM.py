@@ -42,29 +42,29 @@ def rhs(y):
 
 if __name__ == "__main__":
     for u_e2 in [4, 4.1, 4.2, 4.3, 4.35, 4.4, 4.5, 4.6, 4.7]:
-        setup = SimulationSetupTwoStreamFOM(Nx=301,
+        setup = SimulationSetupTwoStreamFOM(Nx=201,
                                             Nv=200,
-                                            epsilon=1e-3,
-                                            alpha_e1=np.sqrt(2),
-                                            alpha_e2=1/np.sqrt(2),
+                                            epsilon=1e-2,
+                                            alpha_e1=0.5,
+                                            alpha_e2=0.5,
                                             alpha_i=np.sqrt(2 / 1836),
-                                            u_e1=0,
-                                            u_e2=u_e2,
+                                            u_e1=-1,
+                                            u_e2=1,
                                             u_i=0,
-                                            L=20 * np.pi / 3,
+                                            L=2 * np.pi,
                                             dt=1e-2,
                                             T0=0,
-                                            T=80,
+                                            T=40,
                                             nu_e1=20,
                                             nu_e2=20,
-                                            n0_e1=0.9,
-                                            n0_e2=0.1)
+                                            n0_e1=0.5,
+                                            n0_e2=0.5)
 
         # initial condition: read in result from previous simulation
         y0 = np.zeros(2 * setup.Nv * setup.Nx)
         # first electron 1 species (perturbed)
         x_ = np.linspace(0, setup.L, setup.Nx, endpoint=False)
-        y0[:setup.Nx] = setup.n0_e1 * (1 + setup.epsilon * np.cos(0.3 * x_)) / setup.alpha_e1
+        y0[:setup.Nx] = setup.n0_e1 * (1 + setup.epsilon * np.cos(x_)) / setup.alpha_e1
         # second electron species (unperturbed)
         y0[setup.Nv * setup.Nx: setup.Nv * setup.Nx + setup.Nx] = setup.n0_e2 * np.ones(setup.Nx) / setup.alpha_e2
         # ions (unperturbed + static)

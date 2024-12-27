@@ -21,6 +21,14 @@ def get_kinetic_reduced_G_matrix(G, Ur):
     return scipy.sparse.csr_matrix(Ur.T @ G)
 
 
+def get_D_inv(Nx, D):
+    mat = np.zeros((Nx + 1, Nx + 1))
+    mat[:-1, :-1] = D.toarray()
+    mat[-1, :-1] = np.ones(Nx)
+    mat[:-1, -1] = np.ones(Nx)
+    return np.linalg.inv(mat)
+
+
 class SimulationSetupROM:
     def __init__(self, Nx, Nv, epsilon, alpha_e, alpha_i, u_e, u_i, L, dt, T0, T, nu,
                  M, Nr, Ur_e, problem_dir, m_e=1, m_i=1836, q_e=-1, q_i=1, construct=True,
