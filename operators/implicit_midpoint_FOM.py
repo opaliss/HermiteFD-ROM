@@ -55,13 +55,13 @@ def implicit_midpoint_solver_FOM(y_0, right_hand_side, param, r_tol=1e-5, a_tol=
         # print out the current time stamp
         print("\n time = ", param.t_vec[tt])
         y_sol[:, tt] = newton_krylov(F=lambda y: implicit_nonlinear_equation(y_new=y,
-                                                                                            y_old=y_sol[:, tt - 1],
-                                                                                            right_hand_side=right_hand_side,
-                                                                                            dt=param.dt),
-                                                    xin=y_sol[:, tt - 1],
-                                                    maxiter=max_iter,
-                                                    method='lgmres',
-                                                    f_tol=a_tol,
-                                                    f_rtol=r_tol,
-                                                    verbose=True)
+                                                                             y_old=y_sol[:, tt - 1],
+                                                                             right_hand_side=right_hand_side,
+                                                                             dt=param.dt),
+                                     xin=y_sol[:, tt - 1],
+                                     maxiter=max_iter,
+                                     method='lgmres',
+                                     f_tol=a_tol,
+                                     f_rtol=r_tol,
+                                     verbose=True)
     return y_sol, param

@@ -1,7 +1,7 @@
 """Module to run the adaptive (or non-adaptive) Hermite linear_landau Landau damping full-order model (FOM) testcase
 
 Author: Opal Issan
-Date: Dec 22nd, 2024
+Date: Dec 26th, 2024
 """
 import sys, os
 
@@ -41,25 +41,26 @@ def rhs(y):
 
 
 if __name__ == "__main__":
-    for k_ in [0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]:
+    for alpha_e in [0.5, 0.75]:
         setup = SimulationSetupFOM(Nx=150,
                                    Nv=20,
                                    epsilon=1e-2,
-                                   alpha_e=np.sqrt(2),
+                                   alpha_e=alpha_e,
                                    alpha_i=np.sqrt(2 / 1836),
                                    u_e=0,
                                    u_i=0,
-                                   L=20 * np.pi,
+                                   L=2 * np.pi,
                                    dt=1e-2,
                                    T0=0,
-                                   T=20,
+                                   T=80,
                                    nu=10,
-                                   construct_B=True)
+                                   construct_B=False)
 
         # initial condition: read in result from previous simulation
         y0 = np.zeros(setup.Nv * setup.Nx)
         # first electron 1 species (perturbed)
-        y0[:setup.Nx] = (1 + setup.epsilon * np.cos(k_ * np.linspace(0, setup.L, setup.Nx, endpoint=False))) / setup.alpha_e
+        x_ = np.linspace(0, setup.L, setup.Nx, endpoint=False)
+        y0[:setup.Nx] = (1 + setup.epsilon * np.cos(x_)) / setup.alpha_e
 
         # ions (unperturbed)
         C0_ions = np.ones(setup.Nx) / setup.alpha_i
@@ -83,16 +84,13 @@ if __name__ == "__main__":
         print("runtime wall = ", end_time_wall)
 
         # make directory
-        if not os.path.exists("../data/FOM/linear_landau/sample_" + str(k_)):
-            os.makedirs("../data/FOM/linear_landau/sample_" + str(k_))
+        if not os.path.exists("../data/FOM/linear_landau/sample_" + str(alpha_e)):
+            os.makedirs("../data/FOM/linear_landau/sample_" + str(alpha_e))
 
         # save the runtime
-        np.save("../data/FOM/linear_landau/sample_" + str(k_) + "/sol_FOM_u_" + str(setup.Nv) + "_k_" + str(k_) + "_runtime_" + str(setup.T0) + "_" + str(setup.T), np.array([end_time_cpu, end_time_wall]))
+        np.save("../data/FOM/linear_landau/sample_" + str(alpha_e) + "/sol_FOM_u_" + str(setup.Nv) + "_alpha_" + str(alpha_e) + "_runtime_" + str(setup.T0) + "_" + str(setup.T), np.array([end_time_cpu, end_time_wall]))
 
         # save results
-        np.save("../data/FOM/linear_landau/sample_" + str(k_) + "/sol_FOM_u_" + str(setup.Nv) + "_k_" + str(k_) + "_" + str(setup.T0) + "_" + str(setup.T), sol_midpoint_u)
+        np.save("../data/FOM/linear_landau/sample_" + str(alpha_e) + "/sol_FOM_u_" + str(setup.Nv) + "_alpha_" + str(alpha_e) + "_" + str(setup.T0) + "_" + str(setup.T), sol_midpoint_u)
 
-        np.save("../data/FOM/linear_landau/sample_" + str(k_) + "/sol_FOM_t_" + str(setup.Nv) + "_k_" + str(k_) + "_" + str(setup.T0) + "_" + str(setup.T), setup.t_vec)
-
-        # save parameters
-        # np.save("../data/FOM/linear_landau/sample_" + str(k_) + "/sol_FOM_setup_" + str(setup.Nv) + "_k_" + str(k_) + "_" + str(setup.T0) + "_" + str(setup.T), setup)
+        np.save("../data/FOM/linear_landau/sample_" + str(alpha_e) + "/sol_FOM_t_" + str(setup.Nv) + "_alpha_" + str(alpha_e) + "_" + str(setup.T0) + "_" + str(setup.T), setup.t_vec)

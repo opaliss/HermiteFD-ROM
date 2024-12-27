@@ -149,15 +149,32 @@ def khatri_rao(mat1, mat2):
 def charge_density(q_e, q_i, alpha_e, alpha_i, C0_e, C0_i):
     """
 
-    :param q_e:
-    :param q_i:
-    :param alpha_e:
-    :param alpha_i:
-    :param C0_e:
-    :param C0_i:
-    :return:
+    :param q_e: float, charge of electrons
+    :param q_i: float, charge of ions
+    :param alpha_e: float, hermite scaling parameter or thermal velocity of electrons
+    :param alpha_i: float, hermite scaling parameter or thermal velocity of ions
+    :param C0_e: vector length Nx, density of electrons
+    :param C0_i: vector length Nx, density of ions
+    :return: change density rho(x, t=t*)
     """
     return q_e * alpha_e * C0_e + q_i * alpha_i * C0_i
+
+
+def charge_density_two_stream(q_e1, q_e2, q_i, alpha_e1, alpha_e2, alpha_i, C0_e1, C0_e2, C0_i):
+    """
+
+    :param q_e1: float, charge of electrons species 1
+    :param q_e2: float, charge of electrons species 2
+    :param q_i: float, charge of ions
+    :param alpha_e1: float, hermite scaling parameter or thermal velocity of electrons species 1
+    :param alpha_e2: float, hermite scaling parameter or thermal velocity of electrons species 2
+    :param alpha_i: float, hermite scaling parameter or thermal velocity of ions
+    :param C0_e1: vector length Nx, density of electrons species 1
+    :param C0_e2: vector length Nx, density of electrons species 2
+    :param C0_i: vector length Nx, density of ions
+    :return: change density rho(x, t=t*)
+    """
+    return q_e1 * alpha_e1 * C0_e1 + q_e2 * alpha_e2 * C0_e2 + q_i * alpha_i * C0_i
 
 
 def mass(state):

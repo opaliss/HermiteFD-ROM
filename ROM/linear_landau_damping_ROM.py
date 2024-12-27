@@ -24,7 +24,7 @@ def rhs(y):
     rho = charge_density(alpha_e=setup.alpha_e, alpha_i=setup.alpha_i,
                          q_e=setup.q_e, q_i=setup.q_i, C0_e=y[:setup.Nx], C0_i=C0_ions)
 
-    E = gmres_solver(rhs=rho, D=setup.D)
+    E = gmres_solver(rhs=rho, D=setup.D, atol=1e-8, rtol=1e-8)
 
     # initialize
     dydt_ = np.zeros(len(y))
@@ -44,20 +44,19 @@ def rhs(y):
 
 
 if __name__ == "__main__":
-    k_ = 0.3
     setup = SimulationSetupROM(Nx=150,
                                Nv=20,
                                epsilon=1e-2,
-                               alpha_e=np.sqrt(2),
+                               alpha_e=0.75,
                                alpha_i=np.sqrt(2 / 1836),
                                u_e=0,
                                u_i=0,
-                               L=20 * np.pi,
+                               L=2 * np.pi,
                                dt=1e-2,
                                T0=0,
-                               T=30,
+                               T=80,
                                nu=10,
-                               Nr=100,
+                               Nr=50,
                                M=3,
                                problem_dir="linear_landau",
                                Ur_e=np.load("../data/ROM/linear_landau/basis_3.npy"),
@@ -70,7 +69,8 @@ if __name__ == "__main__":
     # initial condition: read in result from previous simulation
     y0 = np.zeros(setup.NF + setup.Nr)
     # first electron 1 species (perturbed)
-    y0[:setup.Nx] = (1 + setup.epsilon * np.cos(k_ * np.linspace(0, setup.L, setup.Nx, endpoint=False))) / setup.alpha_e
+    x_ = np.linspace(0, setup.L, setup.Nx, endpoint=False)
+    y0[:setup.Nx] = (1 + setup.epsilon * np.cos(x_)) / setup.alpha_e
     # ions (unperturbed)
     C0_ions = np.ones(setup.Nx) / setup.alpha_i
 
@@ -92,18 +92,17 @@ if __name__ == "__main__":
     end_time_wall = time.time() - start_time_wall
 
     # make directory
-    if not os.path.exists("../data/ROM/linear_landau/sample_" + str(k_) + "/M" + str(setup.M)):
-        os.makedirs("../data/ROM/linear_landau/sample_" + str(k_) + "/M" + str(setup.M))
+    if not os.path.exists("../data/ROM/linear_landau/sample_" + str(setup.alpha_e) + "/M" + str(setup.M)):
+        os.makedirs("../data/ROM/linear_landau/sample_" + str(setup.alpha_e) + "/M" + str(setup.M))
 
     # ROM performance
     print("runtime cpu = ", end_time_cpu)
     print("runtime wall = ", end_time_wall)
-    np.save("../data/ROM/linear_landau/sample_" + str(k_) + "/M" + str(setup.M) + "/sol_midpoint_u_" + str(
-        setup.Nr) + "_nu_" + str(setup.nu) + "_runtime_" + str(setup.T0) + "_" + str(setup.T),
-            np.array([end_time_cpu, end_time_wall]))
+    np.save("../data/ROM/linear_landau/sample_" + str(setup.alpha_e) + "/M" + str(setup.M) + "/sol_midpoint_u_" + str(
+        setup.Nr) + "_nu_" + str(setup.nu) + "_runtime_" + str(setup.T0) + "_" + str(setup.T), np.array([end_time_cpu, end_time_wall]))
 
     # save results
-    np.save("../data/ROM/linear_landau/sample_" + str(k_) + "/M" + str(setup.M) + "/sol_midpoint_u_" + str(
+    np.save("../data/ROM/linear_landau/sample_" + str(setup.alpha_e) + "/M" + str(setup.M) + "/sol_midpoint_u_" + str(
         setup.Nr) + "_nu_" + str(setup.nu) + "_" + str(setup.T0) + "_" + str(setup.T), sol_midpoint_u)
-    np.save("../data/ROM/linear_landau/sample_" + str(k_) + "/M" + str(setup.M) + "/sol_midpoint_t_" + str(
+    np.save("../data/ROM/linear_landau/sample_" + str(setup.alpha_e) + "/M" + str(setup.M) + "/sol_midpoint_t_" + str(
         setup.Nr) + "_nu_" + str(setup.nu) + "_" + str(setup.T0) + "_" + str(setup.T), setup.t_vec)

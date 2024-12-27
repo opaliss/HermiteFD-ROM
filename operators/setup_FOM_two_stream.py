@@ -5,8 +5,7 @@ from operators.finite_difference import ddx_central
 
 class SimulationSetupTwoStreamFOM:
     def __init__(self, Nx,  Nv, epsilon, alpha_e1, alpha_e2, alpha_i, u_e1, u_e2, u_i, L, dt, T0, T,
-                 nu, n0_e1, n0_e2, alpha_tol=np.inf, u_tol=np.inf, m_e1=1, m_e2=1, m_i=1836,
-                 q_e1=-1, q_e2=-1, q_i=1, ions=True):
+                 nu, n0_e1, n0_e2, m_e1=1, m_e2=1, m_i=1836, q_e1=-1, q_e2=-1, q_i=1, ions=False, construct_B=False):
         # set up configuration parameters
         # resolution in space
         self.Nx = Nx
@@ -27,6 +26,7 @@ class SimulationSetupTwoStreamFOM:
         self.n0_e2 = n0_e2
         # x grid is from 0 to L
         self.L = L
+        self.dx = self.L / self.Nx
         # time stepping
         self.dt = dt
         # final time
@@ -45,13 +45,10 @@ class SimulationSetupTwoStreamFOM:
         self.q_i = q_i
         # artificial collisional frequency
         self.nu = nu
-        # parameters tolerances
-        self.u_tol = u_tol
-        self.alpha_tol = alpha_tol
 
         # matrices
         # Fourier derivative matrix
-        self.D = ddx_central(Nx=Nx+1, dx=L/Nx, periodic=True)
+        self.D = ddx_central(Nx=self.Nx+1, dx=self.dx, periodic=True)
 
         # matrix of coefficients (advection)
         A_diag = A2(D=self.D, i=0, j=self.Nv)
@@ -66,14 +63,15 @@ class SimulationSetupTwoStreamFOM:
         if ions:
             self.A_i = self.u_i * A_diag + self.alpha_i * A_off + nu * A_col
 
-        # matrix of coefficient (acceleration)
-        B_mat = B(i=0, j=self.Nv, Nx=self.Nx)
+        if construct_B:
+            # matrix of coefficient (acceleration)
+            B_mat = B(i=0, j=self.Nv, Nx=self.Nx)
 
-        # B matrices
-        self.B_e1 = self.q_e1 / (self.m_e1 * self.alpha_e1) * B_mat
-        self.B_e2 = self.q_e2 / (self.m_e2 * self.alpha_e2) * B_mat
+            # B matrices
+            self.B_e1 = self.q_e1 / self.m_e1 / self.alpha_e1 * B_mat
+            self.B_e2 = self.q_e2 / self.m_e2 / self.alpha_e2 * B_mat
 
-        # if ions evolve
-        if ions:
-            self.B_i = self.q_i / (self.m_i * self.alpha_i) * B_mat
+            # if ions evolve
+            if ions:
+                self.B_i = self.q_i / self.m_i / self.alpha_i * B_mat
 
