@@ -8,7 +8,7 @@ from scipy.sparse.linalg import lgmres
 import numpy as np
 
 
-def gmres_solver(rhs, D, atol=1e-8, rtol=1e-8):
+def gmres_solver(rhs, D, D_inv, atol=1e-8, rtol=1e-8):
     """Poisson solver using an iterative solver: GMRES
 
     :param atol: float, lgmres absolute error tolerance (default is 1e-10)
@@ -17,11 +17,11 @@ def gmres_solver(rhs, D, atol=1e-8, rtol=1e-8):
     :param rhs: array, rhs of the equation (poisson)
     :return: E that satisfies d/dx E = rho or d^2/dx^2 phi = rho
     """
-    x, _ = lgmres(D, rhs - np.mean(rhs), atol=atol, rtol=rtol)
+    x, _ = lgmres(A=D, b=rhs - np.mean(rhs), atol=atol, rtol=rtol, x0=linear_solver_v2(rhs=rhs, D_inv=D_inv))
     return x - np.mean(x)
 
 
-def gmres_solver_v2(rhs, D_inv):
+def linear_solver_v2(rhs, D_inv):
     """Poisson solver
 
     :param D_inv: derivative matrix

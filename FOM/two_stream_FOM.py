@@ -10,7 +10,7 @@ sys.path.append(os.path.abspath(os.path.join('..')))
 from operators.FOM import nonlinear_full, charge_density_two_stream
 from operators.implicit_midpoint_FOM import implicit_midpoint_solver_FOM
 from operators.setup_FOM_two_stream import SimulationSetupTwoStreamFOM
-from operators.poisson_solver import gmres_solver, fft_solver, gmres_solver_v2
+from operators.poisson_solver import gmres_solver, fft_solver, linear_solver_v2
 import time
 import numpy as np
 
@@ -23,7 +23,7 @@ def rhs(y):
                                     alpha_i=setup.alpha_i, q_e1=setup.q_e1, q_e2=setup.q_e2, q_i=setup.q_i)
 
     # electric field computed
-    E = gmres_solver_v2(rhs=rho, D_inv=setup.D_inv)
+    E = gmres_solver(rhs=rho, D=setup.D, D_inv=setup.D_inv, atol=1e-10, rtol=1e-10)
 
     # initialize the rhs dydt
     dydt_ = np.zeros(len(y))
@@ -42,8 +42,8 @@ def rhs(y):
 
 if __name__ == "__main__":
     for u_e2 in [4, 4.1, 4.2, 4.3, 4.35, 4.4, 4.5, 4.6, 4.7]:
-        setup = SimulationSetupTwoStreamFOM(Nx=201,
-                                            Nv=200,
+        setup = SimulationSetupTwoStreamFOM(Nx=151,
+                                            Nv=250,
                                             epsilon=1e-2,
                                             alpha_e1=0.5,
                                             alpha_e2=0.5,
@@ -55,8 +55,8 @@ if __name__ == "__main__":
                                             dt=1e-2,
                                             T0=0,
                                             T=40,
-                                            nu_e1=20,
-                                            nu_e2=20,
+                                            nu_e1=5,
+                                            nu_e2=5,
                                             n0_e1=0.5,
                                             n0_e2=0.5)
 
@@ -66,7 +66,7 @@ if __name__ == "__main__":
         x_ = np.linspace(0, setup.L, setup.Nx, endpoint=False)
         y0[:setup.Nx] = setup.n0_e1 * (1 + setup.epsilon * np.cos(x_)) / setup.alpha_e1
         # second electron species (unperturbed)
-        y0[setup.Nv * setup.Nx: setup.Nv * setup.Nx + setup.Nx] = setup.n0_e2 * np.ones(setup.Nx) / setup.alpha_e2
+        y0[setup.Nv * setup.Nx: setup.Nv * setup.Nx + setup.Nx] = setup.n0_e1 * (1 + setup.epsilon * np.cos(x_)) / setup.alpha_e1
         # ions (unperturbed + static)
         C0_ions = np.ones(setup.Nx) / setup.alpha_i
 
@@ -78,7 +78,7 @@ if __name__ == "__main__":
         sol_midpoint_u, setup = implicit_midpoint_solver_FOM(y_0=y0,
                                                              right_hand_side=rhs,
                                                              r_tol=1e-6,
-                                                             a_tol=1e-8,
+                                                             a_tol=1e-10,
                                                              max_iter=100,
                                                              param=setup)
 
@@ -86,17 +86,17 @@ if __name__ == "__main__":
         end_time_wall = time.time() - start_time_wall
 
         # make directory
-        if not os.path.exists("../data/FOM/bump_on_tail/sample_" + str(setup.u_e2)):
-            os.makedirs("../data/FOM/bump_on_tail/sample_" + str(setup.u_e2))
+        if not os.path.exists("../data/FOM/two_stream/sample_" + str(setup.u_e2)):
+            os.makedirs("../data/FOM/two_stream/sample_" + str(setup.u_e2))
 
         print("runtime cpu = ", end_time_cpu)
         print("runtime wall = ", end_time_wall)
-        np.save("../data/FOM/bump_on_tail/sample_" + str(setup.u_e2) + "/sol_FOM_u_" + str(setup.Nv) + "_nu_" + str(
+        np.save("../data/FOM/two_stream/sample_" + str(setup.u_e2) + "/sol_FOM_u_" + str(setup.Nv) + "_nu_" + str(
             setup.nu_e1) + "_runtime_" + str(setup.T0) + "_" + str(setup.T), np.array([end_time_cpu, end_time_wall]))
 
         # save results
-        np.save("../data/FOM/bump_on_tail/sample_" + str(setup.u_e2) + "/sol_FOM_u_" + str(setup.Nv) + "_nu_" + str(
+        np.save("../data/FOM/two_stream/sample_" + str(setup.u_e2) + "/sol_FOM_u_" + str(setup.Nv) + "_nu_" + str(
             setup.nu_e1) + "_" + str(setup.T0) + "_" + str(setup.T), sol_midpoint_u)
-        np.save("../data/FOM/bump_on_tail/sample_" + str(setup.u_e2) + "/sol_FOM_t_" + str(setup.Nv) + "_nu_" + str(
+        np.save("../data/FOM/two_stream/sample_" + str(setup.u_e2) + "/sol_FOM_t_" + str(setup.Nv) + "_nu_" + str(
             setup.nu_e1) + "_" + str(setup.T0) + "_" + str(setup.T), setup.t_vec)
 
