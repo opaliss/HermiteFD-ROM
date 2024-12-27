@@ -5,7 +5,8 @@ from operators.finite_difference import ddx_central
 
 class SimulationSetupTwoStreamFOM:
     def __init__(self, Nx,  Nv, epsilon, alpha_e1, alpha_e2, alpha_i, u_e1, u_e2, u_i, L, dt, T0, T,
-                 nu, n0_e1, n0_e2, m_e1=1, m_e2=1, m_i=1836, q_e1=-1, q_e2=-1, q_i=1, ions=False, construct_B=False):
+                 nu_e1, nu_e2,  n0_e1, n0_e2, nu_i=0, m_e1=1, m_e2=1, m_i=1836, q_e1=-1, q_e2=-1, q_i=1,
+                 ions=False, construct_B=False):
         # set up configuration parameters
         # resolution in space
         self.Nx = Nx
@@ -44,11 +45,13 @@ class SimulationSetupTwoStreamFOM:
         self.q_e2 = q_e2
         self.q_i = q_i
         # artificial collisional frequency
-        self.nu = nu
+        self.nu_e1 = nu_e1
+        self.nu_e2 = nu_e2
+        self.nu_i = nu_i
 
         # matrices
         # Fourier derivative matrix
-        self.D = ddx_central(Nx=self.Nx+1, dx=self.dx, periodic=True)
+        self.D = ddx_central(Nx=self.Nx+1, dx=self.dx, periodic=True, order=2)
 
         # matrix of coefficients (advection)
         A_diag = A2(D=self.D, i=0, j=self.Nv)
@@ -56,12 +59,12 @@ class SimulationSetupTwoStreamFOM:
         A_col = A3(Nx=self.Nx, i=0, j=self.Nv, Nv=self.Nv)
 
         # A matrices
-        self.A_e1 = self.u_e1 * A_diag + self.alpha_e1 * A_off + nu * A_col
-        self.A_e2 = self.u_e2 * A_diag + self.alpha_e2 * A_off + nu * A_col
+        self.A_e1 = self.u_e1 * A_diag + self.alpha_e1 * A_off + self.nu_e1 * A_col
+        self.A_e2 = self.u_e2 * A_diag + self.alpha_e2 * A_off + self.nu_e2 * A_col
 
         # if ions evolve
         if ions:
-            self.A_i = self.u_i * A_diag + self.alpha_i * A_off + nu * A_col
+            self.A_i = self.u_i * A_diag + self.alpha_i * A_off + self.nu_i * A_col
 
         if construct_B:
             # matrix of coefficient (acceleration)

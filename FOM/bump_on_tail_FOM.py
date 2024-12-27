@@ -16,9 +16,6 @@ import numpy as np
 
 
 def rhs(y):
-    # initialize the rhs dydt
-    dydt_ = np.zeros(len(y))
-
     # charge density computed for poisson's equation
     rho = charge_density_two_stream(C0_e1=y[:setup.Nx],
                                     C0_e2=y[setup.Nx * setup.Nv: setup.Nx * (setup.Nv + 1)],
@@ -28,10 +25,12 @@ def rhs(y):
     # electric field computed
     E = gmres_solver(rhs=rho, D=setup.D)
 
-    # evolving electrons + ions
+    # initialize the rhs dydt
+    dydt_ = np.zeros(len(y))
+    # evolving electrons
     # electron species (1) => bulk
     dydt_[:setup.Nv * setup.Nx] = setup.A_e1 @ y[:setup.Nv * setup.Nx] \
-                                   + nonlinear_full(E=E, psi=y[:setup.Nv * setup.Nx], Nv=setup.Nv, Nx=setup.Nx,
+                                  + nonlinear_full(E=E, psi=y[:setup.Nv * setup.Nx], Nv=setup.Nv, Nx=setup.Nx,
                                                     q=setup.q_e1, m=setup.m_e1, alpha=setup.alpha_e1)
 
     # electron species (2) => bump
@@ -55,8 +54,9 @@ if __name__ == "__main__":
                                             L=20 * np.pi / 3,
                                             dt=1e-2,
                                             T0=0,
-                                            T=60,
-                                            nu=12,
+                                            T=20,
+                                            nu_e1=12,
+                                            nu_e2=12,
                                             n0_e1=0.9,
                                             n0_e2=0.1)
 
@@ -66,7 +66,7 @@ if __name__ == "__main__":
         x_ = np.linspace(0, setup.L, setup.Nx, endpoint=False)
         y0[:setup.Nx] = setup.n0_e1 * (1 + setup.epsilon * np.cos(0.3 * x_)) / setup.alpha_e1
         # second electron species (unperturbed)
-        y0[setup.Nv * setup.Nx: setup.Nv * setup.Nx + setup.Nx] = setup.n0_e2 / setup.alpha_e2
+        y0[setup.Nv * setup.Nx: setup.Nv * setup.Nx + setup.Nx] = setup.n0_e2 * np.ones(setup.Nx) / setup.alpha_e2
         # ions (unperturbed + static)
         C0_ions = np.ones(setup.Nx) / setup.alpha_i
 
