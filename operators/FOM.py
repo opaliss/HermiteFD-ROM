@@ -150,22 +150,18 @@ def Q(Nx, j, i, method="sparse"):
 
 
 def khatri_rao(mat1, mat2, Nx, i, j):
-    """
-    Compute the Khatri-Rao product of two sparse matrices.
+    """compute the khatri-rao product of two **boolean** sparse matrices
+    this is pretty much used to compute Q matrix exclusively!
 
-    Parameters:
-        mat1, mat2 : scipy.sparse.csc_matrix or csr_matrix
-            Input sparse matrices with the same number of columns.
-        Nx : int
-            Number of rows in each sub-block.
-        i, j : int
-            Range of blocks to compute.
+    :param mat1: scipy.sparse.csc_matrix or csr_matrix, input sparse matrices with the same number of columns
+    :param mat2: scipy.sparse.csc_matrix or csr_matrix input sparse matrices with the same number of columns
+    :param Nx : int, number of rows in each sub-block.
+    :param i: int, starting hermite index
+    :param j : int, ending hermite index
 
-    Returns:
-        scipy.sparse.csr_matrix
-            Sparse matrix containing the Khatri-Rao product.
+    :return scipy.sparse.csr_matrix, sparse matrix containing the khatri-Rao product.
     """
-    # Total number of rows and columns in the output matrix
+    # total number of rows and columns in the output matrix
     rows = Nx * (j - i)
     cols = Nx * Nx * (j - i)
 
@@ -173,15 +169,14 @@ def khatri_rao(mat1, mat2, Nx, i, j):
     row_indices = []
     col_indices = []
 
-    for k in range(Nx * (j - i)):
-        # Compute Kronecker product in sparse format
-        kron_result = scipy.sparse.kron(mat1[:, k], mat2[:, k], format='coo')
+    for k in range(rows):
+        # compute kronecker product in sparse format
+        kron_res = scipy.sparse.kron(mat1[:, k], mat2[:, k], format='coo')
         row_indices.append(k)
-        col_indices.append(kron_result.row[0])
+        col_indices.append(kron_res.row[0])
 
     # create the final sparse matrix
-    result = scipy.sparse.csr_matrix((np.ones(len(col_indices)), (row_indices, col_indices)), shape=(rows, cols))
-    return result
+    return scipy.sparse.csr_matrix((np.ones(len(col_indices)), (row_indices, col_indices)), shape=(rows, cols))
 
 
 def charge_density(q_e, q_i, alpha_e, alpha_i, C0_e, C0_i):
