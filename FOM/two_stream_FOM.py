@@ -1,7 +1,7 @@
 """Module to run the two=stream instability full-order model (FOM) testcase
 
 Author: Opal Issan
-Date: Dec 26th, 2024
+Date: Dec 27th, 2024
 """
 import sys, os
 
@@ -41,9 +41,9 @@ def rhs(y):
 
 
 if __name__ == "__main__":
-    setup = SimulationSetupTwoStreamFOM(Nx=151,
+    setup = SimulationSetupTwoStreamFOM(Nx=251,
                                         Nv=250,
-                                        epsilon=1e-1,
+                                        epsilon=0.1,
                                         alpha_e1=0.5,
                                         alpha_e2=0.5,
                                         alpha_i=np.sqrt(2 / 1836),
