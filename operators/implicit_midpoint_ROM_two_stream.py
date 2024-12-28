@@ -99,7 +99,7 @@ def implicit_midpoint_solver_ROM(y_0, right_hand_side, setup,  Nw=0, r_tol=1e-8,
                                                                              dt=setup.dt),
                                      xin=y_sol[:, tt - 1],
                                      maxiter=max_iter,
-                                     method='gmres',
+                                     method='lgmres',
                                      f_tol=a_tol,
                                      f_rtol=r_tol,
                                      verbose=True)

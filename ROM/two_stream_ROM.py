@@ -33,25 +33,31 @@ def rhs(y):
     # evolving electrons
     # solve for the first M fluid coefficient species (1)
     dydt_[:setup.NF] = setup.A_F_e1 @ y[:setup.NF] \
-                       + nonlinear_full(E=E, psi=y[:setup.NF], Nx=setup.Nx, Nv=setup.M, alpha=setup.alpha_e1, q=setup.q_e1, m=setup.m_e1) \
+                       + nonlinear_full(E=E, psi=y[:setup.NF], Nx=setup.Nx, Nv=setup.M, alpha=setup.alpha_e1,
+                                        q=setup.q_e1, m=setup.m_e1) \
                        + setup.G_F_e1 @ y[setup.NF:setup.NF + setup.Nr]
 
     # evolve the rest (kinetic portion) species (1)
     dydt_[setup.NF: setup.NF + setup.Nr] = setup.A_K_e1 @ y[setup.NF:setup.NF + setup.Nr] \
-                       + setup.B_K_e1 @ np.kron(y[setup.NF:setup.NF + setup.Nr], E) \
-                       + setup.G_K_e1 @ y[:setup.NF] \
-                       + setup.J_K_e1 @ (y[setup.NF - setup.Nx: setup.NF] * E)
+                                           + setup.B_K_e1 @ np.kron(y[setup.NF:setup.NF + setup.Nr], E) \
+                                           + setup.G_K_e1 @ y[:setup.NF] \
+                                           + setup.J_K_e1 @ (y[setup.NF - setup.Nx: setup.NF] * E)
 
     # esolve for the first M fluid coefficient species (2)
-    dydt_[setup.NF + setup.Nr: 2*setup.NF + setup.Nr] = setup.A_F_e2 @ y[setup.NF + setup.Nr: 2*setup.NF + setup.Nr] \
-                       + nonlinear_full(E=E, psi=y[setup.NF + setup.Nr: 2*setup.NF + setup.Nr], Nx=setup.Nx, Nv=setup.M, alpha=setup.alpha_e2, q=setup.q_e2, m=setup.m_e2) \
-                       + setup.G_F_e2 @ y[2*setup.NF + setup.Nr:]
+    dydt_[setup.NF + setup.Nr: 2 * setup.NF + setup.Nr] = setup.A_F_e2 @ y[setup.NF + setup.Nr: 2 * setup.NF + setup.Nr] \
+                                                          + nonlinear_full(E=E, psi=y[
+                                                                                    setup.NF + setup.Nr: 2 * setup.NF + setup.Nr],
+                                                                           Nx=setup.Nx, Nv=setup.M,
+                                                                           alpha=setup.alpha_e2, q=setup.q_e2,
+                                                                           m=setup.m_e2) \
+                                                          + setup.G_F_e2 @ y[2 * setup.NF + setup.Nr:]
 
     # evolve the rest (kinetic portion) species (2)
-    dydt_[2*setup.NF + setup.Nr:] = setup.A_K_e2 @ y[2*setup.NF + setup.Nr:] \
-                       + setup.B_K_e2 @ np.kron(y[2*setup.NF + setup.Nr:], E) \
-                       + setup.G_K_e2 @ y[setup.NF + setup.Nr: 2 * setup.NF + setup.Nr] \
-                       + setup.J_K_e2 @ (y[2 * setup.NF + setup.Nr - setup.Nx: 2 * setup.NF + setup.Nr] * E)
+    dydt_[2 * setup.NF + setup.Nr:] = setup.A_K_e2 @ y[2 * setup.NF + setup.Nr:] \
+                                      + setup.B_K_e2 @ np.kron(y[2 * setup.NF + setup.Nr:], E) \
+                                      + setup.G_K_e2 @ y[setup.NF + setup.Nr: 2 * setup.NF + setup.Nr] \
+                                      + setup.J_K_e2 @ (
+                                                  y[2 * setup.NF + setup.Nr - setup.Nx: 2 * setup.NF + setup.Nr] * E)
     return dydt_
 
 
@@ -73,7 +79,7 @@ if __name__ == "__main__":
                                         nu_e2=15,
                                         n0_e1=0.5,
                                         n0_e2=0.5,
-                                        Nr=50,
+                                        Nr=70,
                                         M=5,
                                         problem_dir="two_stream",
                                         Ur_e1=np.load("../data/ROM/two_stream/basis_SVD_e1_0_40_M_5.npy"),
@@ -86,7 +92,8 @@ if __name__ == "__main__":
     x_ = np.linspace(0, setup.L, setup.Nx, endpoint=False)
     y0[:setup.Nx] = setup.n0_e1 * (np.ones(setup.Nx) + setup.epsilon * np.cos(x_)) / setup.alpha_e1
     # second electron species (unperturbed)
-    y0[setup.NF + setup.Nr: setup.NF + setup.Nr + setup.Nx] = setup.n0_e2 * (np.ones(setup.Nx) + setup.epsilon * np.cos(x_)) / setup.alpha_e2
+    y0[setup.NF + setup.Nr: setup.NF + setup.Nr + setup.Nx] = setup.n0_e2 * (
+                np.ones(setup.Nx) + setup.epsilon * np.cos(x_)) / setup.alpha_e2
     # ions (unperturbed + static)
     C0_ions = np.ones(setup.Nx) / setup.alpha_i
 
@@ -95,12 +102,12 @@ if __name__ == "__main__":
     start_time_wall = time.time()
 
     # integrate (implicit midpoint)
-    sol_midpoint_u, setup = implicit_midpoint_solver_ROM(y_0=y0,
-                                                         right_hand_side=rhs,
-                                                         r_tol=None,
-                                                         a_tol=1e-10,
-                                                         max_iter=100,
-                                                         setup=setup)
+    sol_midpoint_u = implicit_midpoint_solver_ROM(y_0=y0,
+                                                  right_hand_side=rhs,
+                                                  r_tol=None,
+                                                  a_tol=1e-12,
+                                                  max_iter=100,
+                                                  setup=setup)
 
     end_time_cpu = time.process_time() - start_time_cpu
     end_time_wall = time.time() - start_time_wall
@@ -111,12 +118,14 @@ if __name__ == "__main__":
 
     print("runtime cpu = ", end_time_cpu)
     print("runtime wall = ", end_time_wall)
-    np.save("../data/ROM/two_stream/sample_" + str(setup.u_e2) + "/M" + str(setup.M) + "/sol_ROM_u_" + str(setup.Nr) + "_nu_" + str(
+    np.save("../data/ROM/two_stream/sample_" + str(setup.u_e2) + "/M" + str(setup.M) + "/sol_ROM_u_" + str(
+        setup.Nr) + "_nu_" + str(
         setup.nu_e1) + "_runtime_" + str(setup.T0) + "_" + str(setup.T), np.array([end_time_cpu, end_time_wall]))
 
     # save results
-    np.save("../data/ROM/two_stream/sample_" + str(setup.u_e2) + "/M" + str(setup.M) + "/sol_ROM_u_" + str(setup.Nr) + "_nu_" + str(
+    np.save("../data/ROM/two_stream/sample_" + str(setup.u_e2) + "/M" + str(setup.M) + "/sol_ROM_u_" + str(
+        setup.Nr) + "_nu_" + str(
         setup.nu_e1) + "_" + str(setup.T0) + "_" + str(setup.T), sol_midpoint_u)
-    np.save("../data/ROM/two_stream/sample_" + str(setup.u_e2) + "/M" + str(setup.M) + "/sol_ROM_t_" + str(setup.Nr) + "_nu_" + str(
+    np.save("../data/ROM/two_stream/sample_" + str(setup.u_e2) + "/M" + str(setup.M) + "/sol_ROM_t_" + str(
+        setup.Nr) + "_nu_" + str(
         setup.nu_e1) + "_" + str(setup.T0) + "_" + str(setup.T), setup.t_vec)
-
