@@ -68,12 +68,12 @@ if __name__ == "__main__":
                                         L=2 * np.pi,
                                         dt=1e-2,
                                         T0=0,
-                                        T=40,
+                                        T=25,
                                         nu_e1=15,
                                         nu_e2=15,
                                         n0_e1=0.5,
                                         n0_e2=0.5,
-                                        Nr=30,
+                                        Nr=50,
                                         M=5,
                                         problem_dir="two_stream",
                                         Ur_e1=np.load("../data/ROM/two_stream/basis_SVD_e1_0_40_M_5.npy"),
@@ -111,12 +111,12 @@ if __name__ == "__main__":
 
     print("runtime cpu = ", end_time_cpu)
     print("runtime wall = ", end_time_wall)
-    np.save("../data/ROM/two_stream/sample_" + str(setup.u_e2) + "/sol_FOM_u_" + str(setup.Nr) + "_nu_" + str(
+    np.save("../data/ROM/two_stream/sample_" + str(setup.u_e2) + "/M" + str(setup.M) + "/sol_ROM_u_" + str(setup.Nr) + "_nu_" + str(
         setup.nu_e1) + "_runtime_" + str(setup.T0) + "_" + str(setup.T), np.array([end_time_cpu, end_time_wall]))
 
     # save results
-    np.save("../data/ROM/two_stream/sample_" + str(setup.u_e2) + "/sol_FOM_u_" + str(setup.Nr) + "_nu_" + str(
+    np.save("../data/ROM/two_stream/sample_" + str(setup.u_e2) + "/M" + str(setup.M) + "/sol_ROM_u_" + str(setup.Nr) + "_nu_" + str(
         setup.nu_e1) + "_" + str(setup.T0) + "_" + str(setup.T), sol_midpoint_u)
-    np.save("../data/ROM/two_stream/sample_" + str(setup.u_e2) + "/sol_FOM_t_" + str(setup.Nr) + "_nu_" + str(
+    np.save("../data/ROM/two_stream/sample_" + str(setup.u_e2) + "/M" + str(setup.M) + "/sol_ROM_t_" + str(setup.Nr) + "_nu_" + str(
         setup.nu_e1) + "_" + str(setup.T0) + "_" + str(setup.T), setup.t_vec)
 
