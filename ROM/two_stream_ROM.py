@@ -73,11 +73,11 @@ if __name__ == "__main__":
                                         nu_e2=15,
                                         n0_e1=0.5,
                                         n0_e2=0.5,
-                                        Nr=100,
-                                        M=3,
+                                        Nr=10,
+                                        M=5,
                                         problem_dir="two_stream",
-                                        Ur_e1=np.load("../data/ROM/two_stream/basis_SVD_e1_0_40_M_3.npy"),
-                                        Ur_e2=np.load("../data/ROM/two_stream/basis_SVD_e2_0_40_M_3.npy"),
+                                        Ur_e1=np.load("../data/ROM/two_stream/basis_SVD_e1_0_40_M_5.npy"),
+                                        Ur_e2=np.load("../data/ROM/two_stream/basis_SVD_e2_0_40_M_5.npy"),
                                         construct=True)
 
     # initial condition: read in result from previous simulation
@@ -106,8 +106,8 @@ if __name__ == "__main__":
     end_time_wall = time.time() - start_time_wall
 
     # make directory
-    if not os.path.exists("../data/ROM/two_stream/sample_" + str(setup.u_e2)):
-        os.makedirs("../data/ROM/two_stream/sample_" + str(setup.u_e2))
+    if not os.path.exists("../data/ROM/two_stream/sample_" + str(setup.u_e2) + "/M" + str(setup.M)):
+        os.makedirs("../data/ROM/two_stream/sample_" + str(setup.u_e2) + "/M" + str(setup.M))
 
     print("runtime cpu = ", end_time_cpu)
     print("runtime wall = ", end_time_wall)

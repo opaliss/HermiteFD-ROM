@@ -10,7 +10,17 @@ def get_kinetic_reduced_A_matrix(A, Ur):
 
 
 def get_kinetic_reduced_B_matrix(B, Ur, Nx):
-    return Ur.T @ B @ scipy.sparse.kron(Ur, scipy.sparse.identity(n=Nx, format="csr"), format="bsr")
+    return kronecker_efficient(mat1=scipy.sparse.csr_matrix(Ur.T @ B), Ur=Ur, Nx=Nx)
+
+
+def kronecker_efficient(mat1, Ur, Nx):
+    Nr = Ur.shape[1]
+    result = np.zeros((Nr, Nr * Nx))
+    for ii in range(Nr):
+        for jj in range(Nr):
+            row = scipy.sparse.kron(Ur[:, jj], scipy.sparse.identity(n=Nx), format="bsr")
+            result[ii, jj * Nx: Nx * (jj + 1)] = (mat1[ii, :] @ row.T).toarray().flatten()
+    return result
 
 
 def get_fluid_reduced_G_matrix(G, Ur):

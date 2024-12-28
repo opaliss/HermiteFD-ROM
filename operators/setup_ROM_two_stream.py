@@ -14,8 +14,6 @@ class SimulationSetupTwoStreamROM:
         self.Nx = Nx
         # spectral resolution in v
         self.Nv = Nv
-        # number of spectral expansions
-        self.Nv = Nv
         # epsilon displacement in initial electron distribution
         self.epsilon = epsilon
         # velocity scaling parameter
