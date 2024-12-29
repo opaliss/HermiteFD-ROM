@@ -74,11 +74,11 @@ if __name__ == "__main__":
                                         nu_e2=15,
                                         n0_e1=0.5,
                                         n0_e2=0.5,
-                                        Nr=130,
-                                        M=10,
+                                        Nr=150,
+                                        M=3,
                                         problem_dir="two_stream",
-                                        Ur_e1=np.load("../data/ROM/two_stream/basis_SVD_e1_0_40_M_10.npy"),
-                                        Ur_e2=np.load("../data/ROM/two_stream/basis_SVD_e2_0_40_M_10.npy"),
+                                        Ur_e1=np.load("../data/ROM/two_stream/basis_SVD_e1_0_40_M_3.npy"),
+                                        Ur_e2=np.load("../data/ROM/two_stream/basis_SVD_e2_0_40_M_3.npy"),
                                         construct=True)
 
     # initial condition: read in result from previous simulation
