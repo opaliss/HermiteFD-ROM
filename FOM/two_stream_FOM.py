@@ -42,13 +42,13 @@ def rhs(y):
 
 if __name__ == "__main__":
     setup = SimulationSetupTwoStreamFOM(Nx=251,
-                                        Nv=250,
+                                        Nv=350,
                                         epsilon=0.1,
                                         alpha_e1=0.5,
                                         alpha_e2=0.5,
                                         alpha_i=np.sqrt(2 / 1836),
-                                        u_e1=-1,
-                                        u_e2=1,
+                                        u_e1=-1.2,
+                                        u_e2=1.2,
                                         u_i=0,
                                         L=2 * np.pi,
                                         dt=1e-2,

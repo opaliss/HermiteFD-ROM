@@ -58,13 +58,13 @@ def rhs(y):
 
 if __name__ == "__main__":
     setup = SimulationSetupTwoStreamROM(Nx=251,
-                                        Nv=250,
+                                        Nv=350,
                                         epsilon=0.1,
                                         alpha_e1=0.5,
                                         alpha_e2=0.5,
                                         alpha_i=np.sqrt(2 / 1836),
-                                        u_e1=-1,
-                                        u_e2=1,
+                                        u_e1=-1.05,
+                                        u_e2=1.05,
                                         u_i=0,
                                         L=2 * np.pi,
                                         dt=1e-2,
@@ -74,11 +74,11 @@ if __name__ == "__main__":
                                         nu_e2=15,
                                         n0_e1=0.5,
                                         n0_e2=0.5,
-                                        Nr=150,
-                                        M=3,
+                                        Nr=100,
+                                        M=10,
                                         problem_dir="two_stream",
-                                        Ur_e1=np.load("../data/ROM/two_stream/basis_SVD_e1_0_40_M_3.npy"),
-                                        Ur_e2=np.load("../data/ROM/two_stream/basis_SVD_e2_0_40_M_3.npy"),
+                                        Ur_e1=np.load("../data/ROM/two_stream/basis_SVD_e1_0_40_M_10.npy"),
+                                        Ur_e2=np.load("../data/ROM/two_stream/basis_SVD_e2_0_40_M_10.npy"),
                                         construct=True)
 
     # initial condition: read in result from previous simulation
