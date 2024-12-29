@@ -26,38 +26,33 @@ def rhs(y):
                                     alpha_i=setup.alpha_i, q_e1=setup.q_e1, q_e2=setup.q_e2, q_i=setup.q_i)
 
     # electric field computed
-    E = gmres_solver(rhs=rho, D=setup.D, D_inv=setup.D_inv, atol=1e-12, rtol=1e-12)
+    E = gmres_solver(rhs=rho, D=setup.D, D_inv=setup.D_inv, atol=1e-14, rtol=1e-14)
 
     # initialize the rhs dydt
     dydt_ = np.zeros(len(y))
-    # evolving electrons
-    # solve for the first M fluid coefficient species (1)
+    # evolve the first M fluid coefficient species (1)
     dydt_[:setup.NF] = setup.A_F_e1 @ y[:setup.NF] \
-                       + nonlinear_full(E=E, psi=y[:setup.NF], Nx=setup.Nx, Nv=setup.M, alpha=setup.alpha_e1,
-                                        q=setup.q_e1, m=setup.m_e1) \
+                       + nonlinear_full(E=E, psi=y[:setup.NF], Nx=setup.Nx, Nv=setup.M, alpha=setup.alpha_e1, q=setup.q_e1, m=setup.m_e1) \
                        + setup.G_F_e1 @ y[setup.NF:setup.NF + setup.Nr]
 
     # evolve the rest (kinetic portion) species (1)
-    dydt_[setup.NF: setup.NF + setup.Nr] = setup.A_K_e1 @ y[setup.NF:setup.NF + setup.Nr] \
-                                           + setup.B_K_e1 @ np.kron(y[setup.NF:setup.NF + setup.Nr], E) \
+    dydt_[setup.NF: setup.NF + setup.Nr] = setup.A_K_e1 @ y[setup.NF: setup.NF + setup.Nr] \
+                                           + setup.B_K_e1 @ np.kron(y[setup.NF: setup.NF + setup.Nr], E) \
                                            + setup.G_K_e1 @ y[:setup.NF] \
                                            + setup.J_K_e1 @ (y[setup.NF - setup.Nx: setup.NF] * E)
 
-    # esolve for the first M fluid coefficient species (2)
+    # evolve the first M fluid coefficient species (2)
     dydt_[setup.NF + setup.Nr: 2 * setup.NF + setup.Nr] = setup.A_F_e2 @ y[setup.NF + setup.Nr: 2 * setup.NF + setup.Nr] \
-                                                          + nonlinear_full(E=E, psi=y[
-                                                                                    setup.NF + setup.Nr: 2 * setup.NF + setup.Nr],
-                                                                           Nx=setup.Nx, Nv=setup.M,
-                                                                           alpha=setup.alpha_e2, q=setup.q_e2,
-                                                                           m=setup.m_e2) \
+                                                          + nonlinear_full(E=E, psi=y[setup.NF + setup.Nr: 2 * setup.NF + setup.Nr],
+                                                                           Nx=setup.Nx, Nv=setup.M, alpha=setup.alpha_e2,
+                                                                           q=setup.q_e2, m=setup.m_e2) \
                                                           + setup.G_F_e2 @ y[2 * setup.NF + setup.Nr:]
 
     # evolve the rest (kinetic portion) species (2)
     dydt_[2 * setup.NF + setup.Nr:] = setup.A_K_e2 @ y[2 * setup.NF + setup.Nr:] \
                                       + setup.B_K_e2 @ np.kron(y[2 * setup.NF + setup.Nr:], E) \
                                       + setup.G_K_e2 @ y[setup.NF + setup.Nr: 2 * setup.NF + setup.Nr] \
-                                      + setup.J_K_e2 @ (
-                                                  y[2 * setup.NF + setup.Nr - setup.Nx: 2 * setup.NF + setup.Nr] * E)
+                                      + setup.J_K_e2 @ (y[2 * setup.NF + setup.Nr - setup.Nx: 2 * setup.NF + setup.Nr] * E)
     return dydt_
 
 
@@ -74,16 +69,16 @@ if __name__ == "__main__":
                                         L=2 * np.pi,
                                         dt=1e-2,
                                         T0=0,
-                                        T=25,
+                                        T=40,
                                         nu_e1=15,
                                         nu_e2=15,
                                         n0_e1=0.5,
                                         n0_e2=0.5,
-                                        Nr=70,
-                                        M=5,
+                                        Nr=130,
+                                        M=10,
                                         problem_dir="two_stream",
-                                        Ur_e1=np.load("../data/ROM/two_stream/basis_SVD_e1_0_40_M_5.npy"),
-                                        Ur_e2=np.load("../data/ROM/two_stream/basis_SVD_e2_0_40_M_5.npy"),
+                                        Ur_e1=np.load("../data/ROM/two_stream/basis_SVD_e1_0_40_M_10.npy"),
+                                        Ur_e2=np.load("../data/ROM/two_stream/basis_SVD_e2_0_40_M_10.npy"),
                                         construct=True)
 
     # initial condition: read in result from previous simulation

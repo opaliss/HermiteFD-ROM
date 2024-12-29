@@ -11,10 +11,10 @@ def get_kinetic_reduced_A_matrix(A, Ur):
 
 def get_kinetic_reduced_B_matrix(B, Ur, Nx):
     # original
-    mat = scipy.sparse.csr_matrix(Ur.T @ B) @ scipy.sparse.kron(Ur, scipy.sparse.identity(n=Nx, format="csr"), format="csr")
-    return mat.toarray()
+    # mat = scipy.sparse.csr_matrix(Ur.T @ B) @ scipy.sparse.kron(Ur, scipy.sparse.identity(n=Nx, format="csr"), format="csr")
+    # return mat.toarray()
     # new iterative version
-    # return kronecker_efficient(mat1=scipy.sparse.csr_matrix(Ur.T @ B), Ur=Ur, Nx=Nx)
+    return kronecker_efficient(mat1=scipy.sparse.csr_matrix(Ur.T @ B), Ur=Ur, Nx=Nx)
 
 
 def kronecker_efficient(mat1, Ur, Nx):
