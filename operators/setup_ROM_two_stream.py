@@ -1,8 +1,9 @@
 import numpy as np
-from operators.FOM import A1, A2, A3, B
+from operators.FOM import A1, A2, A3, Q, B
 from operators.finite_difference import ddx_central
 from operators.ROM import theta_matrix, xi_matrix
-from operators.setup_ROM import get_kinetic_reduced_A_matrix, get_kinetic_reduced_B_matrix, get_kinetic_reduced_G_matrix, get_fluid_reduced_G_matrix, get_D_inv
+from operators.setup_ROM import get_kinetic_reduced_A_matrix, get_kinetic_reduced_B_matrix, \
+    get_kinetic_reduced_G_matrix, get_fluid_reduced_G_matrix, get_D_inv, get_kinetic_reduced_B_alternative
 
 
 class SimulationSetupTwoStreamROM:
@@ -169,12 +170,19 @@ class SimulationSetupTwoStreamROM:
                       + self.u_e2 * get_kinetic_reduced_A_matrix(A=A_diag_K, Ur=self.Ur_e2) \
                       + self.nu_e2 * get_kinetic_reduced_A_matrix(A=A_col_K, Ur=self.Ur_e2)
 
+        del A_diag_K, A_col_K, A_off_K
+
         # matrix of coefficient (acceleration)
         # Fourier transform matrix
-        B_K = B(i=self.M, j=self.Nv, Nx=self.Nx)
+        # B_K = B(i=self.M, j=self.Nv, Nx=self.Nx)
+        # ;;l
+        # self.B_K_e1 = self.q_e1 / self.m_e1 / self.alpha_e1 * get_kinetic_reduced_B_matrix(B=B_K, Ur=self.Ur_e1, Nx=self.Nx, Nv=self.Nv, Nr=self.Nr)
+        # self.B_K_e2 = self.q_e2 / self.m_e2 / self.alpha_e2 * get_kinetic_reduced_B_matrix(B=B_K, Ur=self.Ur_e2, Nx=self.Nx, Nv=self.Nv, Nr=self.Nr)
+        Q_ = Q(Nx=self.Nx, j=self.Nv, i=self.M, method="sparse")
+        self.B_K_e1 = self.q_e1 / self.m_e1 / self.alpha_e1 * get_kinetic_reduced_B_alternative(Ur=self.Ur_e1, Nx=self.Nx, Nr=self.Nr, i=self.M, j=self.Nv, Q=Q_)
+        self.B_K_e2 = self.q_e2 / self.m_e2 / self.alpha_e2 * get_kinetic_reduced_B_alternative(Ur=self.Ur_e2, Nx=self.Nx, Nr=self.Nr, i=self.M, j=self.Nv, Q=Q_)
 
-        self.B_K_e1 = self.q_e1 / self.m_e1 / self.alpha_e1 * get_kinetic_reduced_B_matrix(B=B_K, Ur=self.Ur_e1, Nx=self.Nx)
-        self.B_K_e2 = self.q_e2 / self.m_e2 / self.alpha_e2 * get_kinetic_reduced_B_matrix(B=B_K, Ur=self.Ur_e2, Nx=self.Nx)
+        del Q_
 
         # sparse coupling matrices
         G_F = - np.sqrt(self.M / 2) * xi_matrix(Nx=self.Nx, Nv=self.M) @ self.D @ theta_matrix(Nx=self.Nx, Nv=self.Nv - self.M).T

@@ -108,7 +108,7 @@ def nonlinear_full(E, psi, q, m, alpha, Nv, Nx):
     return res
 
 
-def B(Nx, i, j):
+def B_small(i, j):
     """B matrix of acceleration term
 
     :param i: 0th index
@@ -121,8 +121,20 @@ def B(Nx, i, j):
         # lower diagonal
         if index >= 1:
             B[index, index - 1] = np.sqrt(2 * n)
+    return scipy.sparse.csr_matrix(B)
+
+
+def B(Nx, i, j):
+    """B matrix of acceleration term
+
+    :param i: 0th index
+    :param j: final index
+    :param Nx: int, finite difference resolution
+    :return: 2D matrix, B matrix of acceleration term
+    """
+    B = B_small(i=i, j=j)
     Q_mat = Q(Nx=Nx, j=j, i=i, method="sparse")
-    return scipy.sparse.kron(scipy.sparse.csr_matrix(B), scipy.sparse.identity(n=Nx), format="csr") @ Q_mat
+    return scipy.sparse.kron(scipy.sparse.csr_matrix(B), scipy.sparse.identity(n=Nx, dtype=int), format="csr") @ Q_mat
 
 
 def Q(Nx, j, i, method="sparse"):
@@ -139,14 +151,6 @@ def Q(Nx, j, i, method="sparse"):
         return khatri_rao(mat1.T, mat2.T, j=j, i=i, Nx=Nx)
     else:
         return scipy.sparse.csr_matrix(scipy.linalg.khatri_rao(mat1.toarray().T, mat2.toarray().T).T)
-
-
-# def khatri_rao(mat1, mat2, Nx, i, j):
-#     mat = np.empty((Nx*(j-i), Nx*Nx*(j-i)))
-#     for k in range(Nx*(j-i)):
-#         print(k)
-#         mat[k, :] = np.kron(mat1[:, k].toarray(), mat2[:, k].toarray())[:, 0]
-#     return scipy.sparse.csr_matrix(mat)
 
 
 def khatri_rao(mat1, mat2, Nx, i, j):

@@ -1,5 +1,5 @@
 import numpy as np
-from operators.FOM import A1, A2, A3, B
+from operators.FOM import A1, A2, A3, B_small
 from operators.finite_difference import ddx_central
 from operators.ROM import theta_matrix, xi_matrix
 import scipy
@@ -9,24 +9,35 @@ def get_kinetic_reduced_A_matrix(A, Ur):
     return Ur.T @ A @ Ur
 
 
-def get_kinetic_reduced_B_matrix(B, Ur, Nx):
-    # original
-    mat = scipy.sparse.csr_matrix(Ur.T @ B) @ scipy.sparse.kron(Ur, scipy.sparse.identity(n=Nx, format="csr", dtype=int), format="csr")
-    return mat.toarray()
-    # new iterative version
-    # print("here")
-    # mat1 = scipy.sparse.csr_matrix(Ur.T @ B)
-    # return kronecker_efficient(mat1=mat1, Ur=Ur, Nx=Nx)
+def get_kinetic_reduced_B_matrix(B, Ur, Nx, Nv, Nr):
+    return kronecker_efficient_2(A=scipy.sparse.csr_matrix(Ur.T @ B), Ur=Ur, Nx=Nx, Nr=Nr, Nv=Nv)
 
 
-def kronecker_efficient(mat1, Ur, Nx):
-    Nr = Ur.shape[1]
-    result = np.zeros((Nr, Nr * Nx))
-    for ii in range(Nr):
-        for jj in range(Nr):
-            print(str(ii) + "_" + str(jj))
-            row = scipy.sparse.kron(Ur[:, jj], scipy.sparse.identity(n=Nx, format="csr", dtype=int), format="csr")
-            result[ii, jj * Nx: Nx * (jj + 1)] = (mat1[ii, :] @ row.T).toarray().flatten()
+def get_kinetic_reduced_B_alternative(i, j, Ur, Nx, Nr, Q):
+    B_ = B_small(i=i, j=j)
+    A = kronecker_efficient_1(Ur_t=Ur.T, B_=B_, Nx=Nx, Nr=Nr, Nv=j-i) @ Q
+    return kronecker_efficient_2(A=A, Ur=Ur, Nx=Nx, Nr=Nr, Nv=j-i)
+
+
+def kronecker_efficient_1(Ur_t, B_, Nx, Nr, Nv):
+    result = np.zeros((Nr, Nx*Nv))
+    I = scipy.sparse.identity(Nx, dtype=int)
+    for ii in range(Nv):
+        print(ii)
+        U_block = Ur_t[:, Nx * ii: Nx * (ii + 1)]
+        B_block = scipy.sparse.kron(B_[ii:ii + 1, :], I)
+        result += U_block @ B_block
+    return scipy.sparse.csr_matrix(result)
+
+
+def kronecker_efficient_2(A, Ur, Nx, Nr, Nv):
+    result = np.zeros((Nr, Nx*Nr))
+    I = scipy.sparse.identity(Nx, dtype=int)
+    for ii in range(Nx):
+        print(ii)
+        A_block = A[:, Nv * Nx * ii: Nv * Nx * (ii + 1)]
+        U_block = scipy.sparse.kron(Ur[ii * Nv: (ii + 1) * Nv, :], I)
+        result += A_block @ U_block
     return result
 
 
@@ -250,9 +261,9 @@ class SimulationSetupROM:
         # matrix of coefficient (acceleration)
         B_K = B(Nx=self.Nx, i=self.M, j=self.Nv)
 
-        self.B_K_e = self.q_e / self.m_e / self.alpha_e * get_kinetic_reduced_B_matrix(B=B_K, Ur=self.Ur_e, Nx=self.Nx)
+        self.B_K_e = self.q_e / self.m_e / self.alpha_e * get_kinetic_reduced_B_matrix(B=B_K, Ur=self.Ur_e, Nx=self.Nx, Nv=self.Nv, Nr=self.Nr)
         if self.ions:
-            self.B_K_i = self.q_i / self.m_i / self.alpha_i * get_kinetic_reduced_B_matrix(B=B_K, Ur=self.Ur_i, Nx=self.Nx)
+            self.B_K_i = self.q_i / self.m_i / self.alpha_i * get_kinetic_reduced_B_matrix(B=B_K, Ur=self.Ur_i, Nx=self.Nx, Nv=self.Nv, Nr=self.Nr)
 
         del B_K
 

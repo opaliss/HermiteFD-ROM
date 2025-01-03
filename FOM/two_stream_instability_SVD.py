@@ -29,14 +29,14 @@ setup = SimulationSetupTwoStreamFOM(Nx=251,
                                     construct_B=False)
 
 M = 3
-u_train = [1.05, 1.06, 1.07, 1.08]
+u_train = [1.05, 1.06, 1.07, 1.08, 1.09]
 
 sol_midpoint_u = np.load("../data/FOM/two_stream/sample_" + str(u_train[0]) + "/sol_FOM_u_" + str(setup.Nv) + "_nu_" + str(setup.nu_e1) + "_" + str(setup.T0) + "_" + str(setup.T) + ".npy")
 
 for kk in range(1, len(u_train)):
     print(kk)
     # update the standard deviation parameter
-    new_data =  np.load("../data/FOM/two_stream/sample_" + str(u_train[kk]) + "/sol_FOM_u_" + str(setup.Nv) + "_nu_" + str(setup.nu_e1) + "_" + str(setup.T0) + "_" + str(setup.T) + ".npy")
+    new_data = np.load("../data/FOM/two_stream/sample_" + str(u_train[kk]) + "/sol_FOM_u_" + str(setup.Nv) + "_nu_" + str(setup.nu_e1) + "_" + str(setup.T0) + "_" + str(setup.T) + ".npy")
     sol_midpoint_u = np.append(sol_midpoint_u, new_data, axis=1)
 
 
