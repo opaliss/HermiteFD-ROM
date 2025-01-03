@@ -74,7 +74,7 @@ if __name__ == "__main__":
                                         nu_e2=15,
                                         n0_e1=0.5,
                                         n0_e2=0.5,
-                                        Nr=220,
+                                        Nr=120,
                                         M=3,
                                         problem_dir="two_stream",
                                         Ur_e1=np.load("../data/ROM/two_stream/basis_SVD_e1_0_40_M_3.npy"),
@@ -99,7 +99,7 @@ if __name__ == "__main__":
     # integrate (implicit midpoint)
     sol_midpoint_u = implicit_midpoint_solver_ROM(y_0=y0,
                                                   right_hand_side=rhs,
-                                                  r_tol=None,
+                                                  r_tol=1e-8,
                                                   a_tol=1e-12,
                                                   max_iter=100,
                                                   setup=setup)

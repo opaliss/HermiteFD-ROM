@@ -28,8 +28,8 @@ setup = SimulationSetupTwoStreamFOM(Nx=251,
                                     n0_e2=0.5,
                                     construct_B=False)
 
-M = 3
-u_train = [1.05, 1.06, 1.07, 1.08, 1.09]
+M = 5
+u_train = [1.05, 1.06, 1.07, 1.08]
 
 sol_midpoint_u = np.load("../data/FOM/two_stream/sample_" + str(u_train[0]) + "/sol_FOM_u_" + str(setup.Nv) + "_nu_" + str(setup.nu_e1) + "_" + str(setup.T0) + "_" + str(setup.T) + ".npy")
 
