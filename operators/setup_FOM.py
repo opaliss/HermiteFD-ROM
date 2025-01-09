@@ -12,6 +12,8 @@ class SimulationSetupFOM:
         self.Nx = Nx
         # velocity resolution
         self.Nv = Nv
+        # total number of DOF for each species
+        self.N = self.Nx * self.Nv
         # epsilon displacement in initial electron distribution
         self.epsilon = epsilon
         # velocity scaling parameter (mean thermal velocity)

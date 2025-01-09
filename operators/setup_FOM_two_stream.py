@@ -13,6 +13,8 @@ class SimulationSetupTwoStreamFOM:
         self.Nx = Nx
         # resolution in velocity
         self.Nv = Nv
+        # total DOF for each species
+        self.N = self.Nv * self.Nx
         # epsilon displacement in initial electron distribution
         self.epsilon = epsilon
         # velocity scaling of electron and ion

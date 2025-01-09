@@ -18,7 +18,7 @@ import numpy as np
 def rhs(y):
     # charge density computed for poisson's equation
     rho = charge_density_two_stream(C0_e1=y[:setup.Nx],
-                                    C0_e2=y[setup.Nx * setup.Nv: setup.Nx * (setup.Nv + 1)],
+                                    C0_e2=y[setup.N: setup.N + setup.Nx],
                                     C0_i=C0_ions, alpha_e1=setup.alpha_e1, alpha_e2=setup.alpha_e2,
                                     alpha_i=setup.alpha_i, q_e1=setup.q_e1, q_e2=setup.q_e2, q_i=setup.q_i)
 
@@ -29,14 +29,12 @@ def rhs(y):
     dydt_ = np.zeros(len(y))
     # evolving electrons
     # electron species (1) => bulk
-    dydt_[:setup.Nv * setup.Nx] = setup.A_e1 @ y[:setup.Nv * setup.Nx] \
-                                  + nonlinear_full(E=E, psi=y[:setup.Nv * setup.Nx], Nv=setup.Nv, Nx=setup.Nx,
-                                                    q=setup.q_e1, m=setup.m_e1, alpha=setup.alpha_e1)
+    dydt_[:setup.N] = setup.A_e1 @ y[:setup.N] + nonlinear_full(E=E, psi=y[:setup.N], Nv=setup.Nv, Nx=setup.Nx,
+                                                                q=setup.q_e1, m=setup.m_e1, alpha=setup.alpha_e1)
 
     # electron species (2) => bump
-    dydt_[setup.Nv * setup.Nx:] = setup.A_e2 @ y[setup.Nv * setup.Nx:] \
-                                  + nonlinear_full(E=E, psi=y[setup.Nv * setup.Nx:], Nv=setup.Nv, Nx=setup.Nx,
-                                                   q=setup.q_e2, m=setup.m_e2, alpha=setup.alpha_e2)
+    dydt_[setup.N:] = setup.A_e2 @ y[setup.N:] + nonlinear_full(E=E, psi=y[setup.N:], Nv=setup.Nv, Nx=setup.Nx,
+                                                                q=setup.q_e2, m=setup.m_e2, alpha=setup.alpha_e2)
     return dydt_
 
 
@@ -61,12 +59,12 @@ if __name__ == "__main__":
                                         construct_B=True)
 
     # initial condition: read in result from previous simulation
-    y0 = np.zeros(2 * setup.Nv * setup.Nx)
+    y0 = np.zeros(2 * setup.N)
     # first electron 1 species (perturbed)
     x_ = np.linspace(0, setup.L, setup.Nx, endpoint=False)
     y0[:setup.Nx] = setup.n0_e1 * (np.ones(setup.Nx) + setup.epsilon * np.cos(x_)) / setup.alpha_e1
     # second electron species (unperturbed)
-    y0[setup.Nv * setup.Nx: setup.Nv * setup.Nx + setup.Nx] = setup.n0_e2 * (np.ones(setup.Nx) + setup.epsilon * np.cos(x_)) / setup.alpha_e2
+    y0[setup.N: setup.N + setup.Nx] = setup.n0_e2 * (np.ones(setup.Nx) + setup.epsilon * np.cos(x_)) / setup.alpha_e2
     # ions (unperturbed + static)
     C0_ions = np.ones(setup.Nx) / setup.alpha_i
 
@@ -99,4 +97,3 @@ if __name__ == "__main__":
         setup.nu_e1) + "_" + str(setup.T0) + "_" + str(setup.T), sol_midpoint_u)
     np.save("../data/FOM/two_stream/sample_" + str(setup.u_e2) + "/sol_FOM_t_" + str(setup.Nv) + "_nu_" + str(
         setup.nu_e1) + "_" + str(setup.T0) + "_" + str(setup.T), setup.t_vec)
-
