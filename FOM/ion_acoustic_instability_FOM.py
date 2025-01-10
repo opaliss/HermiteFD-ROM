@@ -43,7 +43,7 @@ def rhs(y):
 
 
 if __name__ == "__main__":
-    setup = SimulationSetupFOM(Nx=151,
+    setup = SimulationSetupFOM(Nx=251,
                                Nv=300,
                                epsilon=1e-2,
                                alpha_e=np.sqrt(2),

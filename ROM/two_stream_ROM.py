@@ -1,7 +1,7 @@
 """Module to run the two=stream instability reduced-order model (ROM) testcase
 
 Author: Opal Issan
-Date: Dec 27th, 2024
+Date: Jan 9th, 2024
 """
 import sys, os
 
@@ -26,7 +26,7 @@ def rhs(y):
                                     alpha_i=setup.alpha_i, q_e1=setup.q_e1, q_e2=setup.q_e2, q_i=setup.q_i)
 
     # electric field computed
-    E = gmres_solver(rhs=rho, D=setup.D, D_inv=setup.D_inv, atol=1e-14, rtol=1e-14)
+    E = gmres_solver(rhs=rho, D=setup.D, D_inv=setup.D_inv, atol=1e-12, rtol=1e-12)
 
     # initialize the rhs dydt
     dydt_ = np.zeros(len(y))
@@ -63,8 +63,8 @@ if __name__ == "__main__":
                                         alpha_e1=0.5,
                                         alpha_e2=0.5,
                                         alpha_i=np.sqrt(2 / 1836),
-                                        u_e1=-1.065,
-                                        u_e2=1.065,
+                                        u_e1=-1.09,
+                                        u_e2=1.09,
                                         u_i=0,
                                         L=2 * np.pi,
                                         dt=1e-2,
@@ -74,11 +74,11 @@ if __name__ == "__main__":
                                         nu_e2=15,
                                         n0_e1=0.5,
                                         n0_e2=0.5,
-                                        Nr=150,
-                                        M=10,
+                                        Nr=350,
+                                        M=3,
                                         problem_dir="two_stream",
-                                        Ur_e1=np.load("../data/ROM/two_stream/basis_SVD_e1_0_40_M_10.npy"),
-                                        Ur_e2=np.load("../data/ROM/two_stream/basis_SVD_e2_0_40_M_10.npy"),
+                                        Ur_e1=np.load("../data/ROM/two_stream/basis_SVD_e1_0_40_M_3.npy"),
+                                        Ur_e2=np.load("../data/ROM/two_stream/basis_SVD_e2_0_40_M_3.npy"),
                                         construct=True)
 
     # initial condition: read in result from previous simulation

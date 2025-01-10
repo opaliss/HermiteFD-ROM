@@ -31,17 +31,17 @@ setup = SimulationSetupTwoStreamFOM(Nx=251,
 for M in range(3, 11):
     u_train = [1.05, 1.06, 1.07, 1.08]
 
-    sol_midpoint_u = np.load("../data/FOM/two_stream/sample_" + str(u_train[0]) + "/sol_FOM_u_" + str(setup.Nv) + "_nu_" + str(setup.nu_e1) + "_" + str(setup.T0) + "_" + str(setup.T) + ".npy")
+    sol_midpoint_u = np.load("../data/FOM/two_stream/sample_" + str(u_train[0]) + "/sol_FOM_u_" + str(setup.Nv) + "_nu_" + str(setup.nu_e1) + "_" + str(setup.T0) + "_" + str(setup.T) + ".npy")[:, :3001]
 
     for kk in range(1, len(u_train)):
         print(kk)
         # update the standard deviation parameter
-        new_data = np.load("../data/FOM/two_stream/sample_" + str(u_train[kk]) + "/sol_FOM_u_" + str(setup.Nv) + "_nu_" + str(setup.nu_e1) + "_" + str(setup.T0) + "_" + str(setup.T) + ".npy")
+        new_data = np.load("../data/FOM/two_stream/sample_" + str(u_train[kk]) + "/sol_FOM_u_" + str(setup.Nv) + "_nu_" + str(setup.nu_e1) + "_" + str(setup.T0) + "_" + str(setup.T) + ".npy")[:, :3001]
         sol_midpoint_u = np.append(sol_midpoint_u, new_data, axis=1)
 
 
-    sol_midpoint_e1 = sol_midpoint_u[M*setup.Nx:setup.Nx*setup.Nv, :]
-    sol_midpoint_e2 = sol_midpoint_u[setup.Nv*setup.Nx+M*setup.Nx:, :]
+    sol_midpoint_e1 = sol_midpoint_u[M*setup.Nx:setup.N, :]
+    sol_midpoint_e2 = sol_midpoint_u[setup.N+M*setup.Nx:, :]
 
     # compute the SVD
     # electrons species (1)
