@@ -11,7 +11,7 @@ import numpy as np
 def gmres_solver(rhs, D, D_inv, atol=1e-8, rtol=1e-8):
     """Poisson solver using an iterative solver: GMRES
 
-    :param atol: float, lgmres absolute error tolerance (default is 1e-10)
+    :param atol: float, lgmres absolute error tolerance (default is 1e-8)
     :param rtol: float, lgmres relative error tolerance (default is 1e-8)
     :param D: derivative matrix
     :param rhs: array, rhs of the equation (poisson)

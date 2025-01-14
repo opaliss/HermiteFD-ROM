@@ -43,18 +43,18 @@ def rhs(y):
 
 
 if __name__ == "__main__":
-    setup = SimulationSetupFOM(Nx=251,
-                               Nv=300,
-                               epsilon=1e-2,
+    setup = SimulationSetupFOM(Nx=301,
+                               Nv=350,
+                               epsilon=0.05,
                                alpha_e=np.sqrt(2),
-                               alpha_i=1/np.sqrt(2),
+                               alpha_i=1,
                                u_e=3,
                                u_i=0,
-                               L=8 * np.pi,
+                               L=10,
                                dt=1e-2,
                                T0=0,
-                               T=40,
-                               nu=15,
+                               T=30,
+                               nu=20,
                                m_e=1,
                                m_i=1,
                                ions=True,
@@ -64,10 +64,9 @@ if __name__ == "__main__":
     y0 = np.zeros(2 * setup.N)
     # first electron 1 species (perturbed)
     x_ = np.linspace(0, setup.L, setup.Nx, endpoint=False)
-    k_ = 0.25
     # electrons (perturbed)
-    y0[:setup.Nx] = (1 + setup.epsilon * np.cos(x_ * k_)) / setup.alpha_e
-    # ions (unperturbed)
+    y0[:setup.Nx] = (1 + setup.epsilon * (np.cos(x_ * np.pi / 5) + np.cos(x_ * 4 * np.pi / 10) + np.cos(x_ * 6 * np.pi / 10))) / setup.alpha_e
+    # ions (perturbed)
     y0[setup.N: setup.N + setup.Nx] = 1 / setup.alpha_i
 
     # start timer

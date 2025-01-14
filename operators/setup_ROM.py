@@ -1,5 +1,5 @@
 import numpy as np
-from operators.FOM import A1, A2, A3, B_small
+from operators.FOM import A1, A2, A3, B_small, Q, B
 from operators.finite_difference import ddx_central
 from operators.ROM import theta_matrix, xi_matrix
 import scipy
@@ -259,13 +259,16 @@ class SimulationSetupROM:
         del A_diag_K, A_col_K, A_off_K
 
         # matrix of coefficient (acceleration)
-        B_K = B(Nx=self.Nx, i=self.M, j=self.Nv)
-
-        self.B_K_e = self.q_e / self.m_e / self.alpha_e * get_kinetic_reduced_B_matrix(B=B_K, Ur=self.Ur_e, Nx=self.Nx, Nv=self.Nv, Nr=self.Nr)
+        Q_ = Q(Nx=self.Nx, j=self.Nv, i=self.M, method="sparse")
+        self.B_K_e = self.q_e / self.m_e / self.alpha_e * get_kinetic_reduced_B_alternative(Ur=self.Ur_e, Nx=self.Nx, Nr=self.Nr,
+                                                                                            i=self.M, j=self.Nv,
+                                                                                            Q=Q_)
         if self.ions:
-            self.B_K_i = self.q_i / self.m_i / self.alpha_i * get_kinetic_reduced_B_matrix(B=B_K, Ur=self.Ur_i, Nx=self.Nx, Nv=self.Nv, Nr=self.Nr)
-
-        del B_K
+            self.B_K_i = self.q_i / self.m_i / self.alpha_i * get_kinetic_reduced_B_alternative(Ur=self.Ur_i,
+                                                                                                Nx=self.Nx, Nr=self.Nr,
+                                                                                                i=self.M, j=self.Nv,
+                                                                                                Q=Q_)
+        del Q_
 
         # sparse coupling matrices
         G_F = -np.sqrt(self.M / 2) * xi_matrix(Nx=self.Nx, Nv=self.M) @ self.D @ theta_matrix(Nx=self.Nx, Nv=self.Nv - self.M).T
