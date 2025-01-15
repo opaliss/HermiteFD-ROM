@@ -14,6 +14,7 @@ def get_kinetic_reduced_B_matrix(B, Ur, Nx, Nv, Nr):
 
 
 def get_kinetic_reduced_B_alternative(i, j, Ur, Nx, Nr, Q):
+    # B small is without the kronecker product
     B_ = B_small(i=i, j=j)
     A = kronecker_efficient_1(Ur_t=Ur.T, B_=B_, Nx=Nx, Nr=Nr, Nv=j-i) @ Q
     return kronecker_efficient_2(A=A, Ur=Ur, Nx=Nx, Nr=Nr, Nv=j-i)
@@ -23,7 +24,7 @@ def kronecker_efficient_1(Ur_t, B_, Nx, Nr, Nv):
     result = np.zeros((Nr, Nx*Nv))
     I = scipy.sparse.identity(Nx, dtype=int)
     for ii in range(Nv):
-        print(ii)
+        print("kronecker efficient 1 = ",  ii)
         U_block = Ur_t[:, Nx * ii: Nx * (ii + 1)]
         B_block = scipy.sparse.kron(B_[ii:ii + 1, :], I)
         result += U_block @ B_block
@@ -31,14 +32,27 @@ def kronecker_efficient_1(Ur_t, B_, Nx, Nr, Nv):
 
 
 def kronecker_efficient_2(A, Ur, Nx, Nr, Nv):
-    result = np.zeros((Nr, Nx*Nr))
-    I = scipy.sparse.identity(Nx, dtype=int)
-    for ii in range(Nx):
-        print(ii)
-        A_block = A[:, Nv * Nx * ii: Nv * Nx * (ii + 1)]
-        U_block = scipy.sparse.kron(Ur[ii * Nv: (ii + 1) * Nv, :], I)
-        result += A_block @ U_block
-    return result
+    """
+
+    :param A: matrix size Nr x NvNx^2, Ur.T @ B
+    :param Ur: matrix size NvNx x Nr, reduced basis
+    :param Nx: int, number of spatial points
+    :param Nr: int, number of reduced dimensions
+    :param Nv: int, number of Hermite modes
+    :return: reduced operator Br = Ur.T @ B (Ur kron I_{Nx})
+    """
+    Br = np.zeros((Nr, Nx*Nr))
+
+    for col in range(Nr):
+        for row in range(Nr):
+            for index in range(Nx*Nv):
+                Br[row, col*Nx:col*(Nx+1)] += Ur[index, col] * A[row, index*Nx:index*(Nx+1)]
+
+        # print("kronecker efficient 2=", ii)
+        # A_block = A[:, Nv * Nx * ii: Nv * Nx * (ii + 1)]
+        # U_block = scipy.sparse.kron(Ur[ii * Nv: (ii + 1) * Nv, :], I)
+        # result += A_block @ U_block
+    return Br
 
 
 def get_fluid_reduced_G_matrix(G, Ur):
