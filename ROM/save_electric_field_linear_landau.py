@@ -5,11 +5,11 @@ from operators.poisson_solver import gmres_solver
 from operators.FOM import charge_density
 
 for M in range(3, 7):
-    for Nr in np.arange(8, 50, 2):
+    for Nr in np.arange(5, 45, 5):
         setup = SimulationSetupROM(Nx=151,
                                    Nv=20,
                                    epsilon=1e-2,
-                                   alpha_e=0.5,
+                                   alpha_e=0.75,
                                    alpha_i=np.sqrt(2 / 1836),
                                    u_e=0,
                                    u_i=0,
@@ -29,7 +29,6 @@ for M in range(3, 7):
         # ions (unperturbed)
         C0_ions = np.ones(setup.Nx) / setup.alpha_i
 
-
         # load the simulation results
         sol_u_reduced = np.load("../data/ROM/linear_landau/sample_" + str(setup.alpha_e) + "/M" + str(setup.M) + "/sol_midpoint_u_" + str(setup.Nr) + "_nu_" + str(setup.nu) + "_" + str(setup.T0) + "_" + str(setup.T) + ".npy")
         sol_midpoint_t = np.load("../data/ROM/linear_landau/sample_" + str(setup.alpha_e) + "/M" + str(setup.M) + "/sol_midpoint_t_" + str(setup.Nr) + "_nu_" + str(setup.nu) + "_" + str(setup.T0) + "_" + str(setup.T) + ".npy")
@@ -45,13 +44,12 @@ for M in range(3, 7):
         # initialize the electric potential
         E_midpoint = np.zeros((setup.Nx + 1, len(sol_midpoint_t)))
 
-        for ii in np.arange(0, len(sol_midpoint_t), 1):
-            print("time = ", sol_midpoint_t[ii])
-            for n in range(setup.Nv):
-                # unwind the flattening to solve the Vlasov-Poisson system
-                # electrons
-                state_e_midpoint[n, :-1, ii] = sol_u_ROM[n * setup.Nx: (n + 1) * setup.Nx, ii]
-                state_e_midpoint[n, -1, ii] = state_e_midpoint[n, 0, ii]
+        # unwind the flattening to solve the Vlasov-Poisson system
+        for ii in range(len(sol_midpoint_t)):
+            # unwind the flattening to solve the Vlasov-Poisson system
+            # electrons
+            state_e_midpoint[:, :-1, ii] = np.reshape(sol_u_ROM[:, ii], (setup.Nv, setup.Nx))
+            state_e_midpoint[:, -1, ii] = state_e_midpoint[:, 0, ii]
 
             # immobile ions
             state_i_midpoint[0, :-1, ii] = C0_ions
@@ -73,4 +71,3 @@ for M in range(3, 7):
             E1_midpoint[ii] = np.abs(scipy.fft.fft(E_midpoint[:, ii]))[1] / setup.Nx  # normalize fft
 
         np.save("../data/ROM/linear_landau/sample_" + str(setup.alpha_e) + "/M" + str(setup.M) + "/sol_midpoint_E_" + str(setup.Nr) + "_alpha_" + str(setup.alpha_e) + ".npy", E_midpoint)
-        np.save("../data/ROM/linear_landau/sample_" + str(setup.alpha_e) + "/M" + str(setup.M) + "/sol_midpoint_E1_" + str(setup.Nr) + "_alpha_" + str(setup.alpha_e) + ".npy", E1_midpoint)

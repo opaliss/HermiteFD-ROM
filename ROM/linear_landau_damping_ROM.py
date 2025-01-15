@@ -38,11 +38,11 @@ def rhs(y):
 
 if __name__ == "__main__":
     for M in range(3, 7):
-        for Nr in range(5, 55, 5):
+        for Nr in range(5, 45, 5):
             setup = SimulationSetupROM(Nx=151,
                                        Nv=20,
                                        epsilon=1e-2,
-                                       alpha_e=0.5,
+                                       alpha_e=0.75,
                                        alpha_i=np.sqrt(2 / 1836),
                                        u_e=0,
                                        u_i=0,
@@ -52,9 +52,9 @@ if __name__ == "__main__":
                                        T=80,
                                        nu=10,
                                        Nr=Nr,
-                                       M=4,
+                                       M=M,
                                        problem_dir="linear_landau",
-                                       Ur_e=np.load("../data/ROM/linear_landau/basis_4.npy"),
+                                       Ur_e=np.load("../data/ROM/linear_landau/basis_" + str(M) + ".npy"),
                                        construct=True,
                                        ions=False)
 
