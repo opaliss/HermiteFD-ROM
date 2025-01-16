@@ -1,7 +1,7 @@
 """Module to run the weak_landau Landau damping reduced-order model (ROM) testcase
 
 Author: Opal Issan
-Date: Dec 26th, 2024
+Date: Jan 15th, 2024
 """
 import sys, os
 
