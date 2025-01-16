@@ -30,8 +30,8 @@ for M in range(3, 7):
         C0_ions = np.ones(setup.Nx) / setup.alpha_i
 
         # load the simulation results
-        sol_u_reduced = np.load("../data/ROM/weak_landau/sample_" + str(setup.alpha_e) + "/M" + str(setup.M) + "/sol_midpoint_u_" + str(setup.Nr) + "_nu_" + str(setup.nu) + "_" + str(setup.T0) + "_" + str(setup.T) + ".npy")
-        sol_midpoint_t = np.load("../data/ROM/weak_landau/sample_" + str(setup.alpha_e) + "/M" + str(setup.M) + "/sol_midpoint_t_" + str(setup.Nr) + "_nu_" + str(setup.nu) + "_" + str(setup.T0) + "_" + str(setup.T) + ".npy")
+        sol_u_reduced = np.load("../data/ROM/weak_landau/sample_" + str(setup.alpha_e) + "/M" + str(setup.M) + "/sol_midpoint_u_" + str(setup.Nr) + "_" + str(setup.T0) + "_" + str(setup.T) + ".npy")
+        sol_midpoint_t = np.load("../data/ROM/weak_landau/sample_" + str(setup.alpha_e) + "/M" + str(setup.M) + "/sol_midpoint_t_" + str(setup.Nr) + "_" + str(setup.T0) + "_" + str(setup.T) + ".npy")
 
         # project back up the reduced simulation results
         sol_u_ROM = np.zeros((setup.Nx*setup.Nv, len(sol_midpoint_t)))
@@ -45,29 +45,22 @@ for M in range(3, 7):
         E_midpoint = np.zeros((setup.Nx + 1, len(sol_midpoint_t)))
 
         # unwind the flattening to solve the Vlasov-Poisson system
-        for ii in range(len(sol_midpoint_t)):
-            # unwind the flattening to solve the Vlasov-Poisson system
-            # electrons
-            state_e_midpoint[:, :-1, ii] = np.reshape(sol_u_ROM[:, ii], (setup.Nv, setup.Nx))
-            state_e_midpoint[:, -1, ii] = state_e_midpoint[:, 0, ii]
+        # electrons
+        state_e_midpoint[:, :-1, :] = np.reshape(sol_u_ROM, (setup.Nv, setup.Nx, len(sol_midpoint_t)))
+        state_e_midpoint[:, -1, :] = state_e_midpoint[:, 0, :]
 
+        # unwind the flattening to solve the Vlasov-Poisson system
+        for ii in range(len(sol_midpoint_t)):
             # immobile ions
             state_i_midpoint[0, :-1, ii] = C0_ions
             state_i_midpoint[0, -1, ii] = state_i_midpoint[0, 0, ii]
 
             # solve Poisson's equation to obtain an electric field
-            rho = charge_density(alpha_e=setup.alpha_e, alpha_i=setup.alpha_i,
-                                 q_e=setup.q_e, q_i=setup.q_i,
-                                 C0_e=state_e_midpoint[0, :setup.Nx, ii],
-                                 C0_i=C0_ions)
+            rho = charge_density(alpha_e=setup.alpha_e, alpha_i=setup.alpha_i, q_e=setup.q_e, q_i=setup.q_i,
+                                 C0_e=state_e_midpoint[0, :setup.Nx, ii], C0_i=C0_ions)
 
             E_midpoint[:-1, ii] = gmres_solver(rhs=rho, D=setup.D, D_inv=setup.D_inv, atol=1e-12, rtol=1e-12)
             E_midpoint[-1, ii] = E_midpoint[0, ii]
 
-        # compute the electric field k=1 mode amplitude using fft
-        E1_midpoint = np.zeros(len(sol_midpoint_t))
-
-        for ii in range(len(sol_midpoint_t)):
-            E1_midpoint[ii] = np.abs(scipy.fft.fft(E_midpoint[:, ii]))[1] / setup.Nx  # normalize fft
-
-        np.save("../data/ROM/weak_landau/sample_" + str(setup.alpha_e) + "/M" + str(setup.M) + "/sol_midpoint_E_" + str(setup.Nr) + "_alpha_" + str(setup.alpha_e) + ".npy", E_midpoint)
+        np.save("../data/ROM/weak_landau/sample_" + str(setup.alpha_e) + "/M" + str(setup.M)
+                + "/sol_midpoint_E_" + str(setup.Nr) + ".npy", E_midpoint)
