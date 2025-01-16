@@ -88,7 +88,7 @@ def implicit_midpoint_solver_ROM(y_0, right_hand_side, setup,  Nw=0, r_tol=1e-8,
                 # kinetic portion electron (2)
                 y_sol[:, tt - 1][2 * setup.NF + setup.Nr:] = np.conjugate(Ur_e2_next).T @ y_sol_e2
 
-                # reload the operators and POD basis for this window
+                # reload the operators and POD basis_20 for this window
                 setup.Ur_e1 = Ur_e1_next
                 setup.Ur_e2 = Ur_e2_next
                 setup.load_operators()

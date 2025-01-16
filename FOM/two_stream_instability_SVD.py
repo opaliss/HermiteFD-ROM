@@ -48,7 +48,7 @@ for M in range(3, 11):
     U_e2, S_e2, _ = np.linalg.svd(sol_midpoint_u[setup.N+M*setup.Nx:, :], full_matrices=False)
     print("e2 SVD computed!")
 
-    # basis save first 500 modes (we dont really use more than that)
+    # basis_20 save first 500 modes (we dont really use more than that)
     np.save("../data/ROM/two_stream/basis_SVD_e1_" + str(setup.T0) + "_" + str(setup.T) + "_M_" + str(M) + ".npy", U_e1[:, :500])
     np.save("../data/ROM/two_stream/basis_SVD_e2_" + str(setup.T0) + "_" + str(setup.T) + "_M_" + str(M) + ".npy", U_e2[:, :500])
 

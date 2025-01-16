@@ -75,7 +75,7 @@ def implicit_midpoint_solver_ROM(y_0, right_hand_side, setup, t_vec, Nw, r_tol=1
                 # ions
                 y_sol[:, tt-1][2 * setup.NF + setup.Nr:] = np.conjugate(Ur_i_next).T @ setup.Ur_i @ y_sol[:, tt-1][2 * setup.NF + setup.Nr:]
 
-                # reload the operators and POD basis for this window
+                # reload the operators and POD basis_20 for this window
                 setup.Ur_e = Ur_e_next
                 setup.Ur_i = Ur_i_next
                 setup.load_operators()

@@ -8,7 +8,7 @@ import scipy.special
 
 
 def psi_ln_aw(n, alpha_s, u_s, v):
-    """AW Hermite basis function (iterative approach)
+    """AW Hermite basis_20 function (iterative approach)
 
     :param alpha_s: float, velocity scaling parameter
     :param u_s, float, velocity shifting parameter

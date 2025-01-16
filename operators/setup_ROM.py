@@ -35,7 +35,7 @@ def kronecker_efficient_2(A, Ur, Nx, Nr, Nv):
     """
 
     :param A: matrix size Nr x NvNx^2, Ur.T @ B
-    :param Ur: matrix size NvNx x Nr, reduced basis
+    :param Ur: matrix size NvNx x Nr, reduced basis_20
     :param Nx: int, number of spatial points
     :param Nr: int, number of reduced dimensions
     :param Nv: int, number of Hermite modes

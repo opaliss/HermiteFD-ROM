@@ -37,66 +37,67 @@ def rhs(y):
 
 
 if __name__ == "__main__":
-    for M in range(3, 7):
-        for Nr in range(5, 45, 5):
-            setup = SimulationSetupROM(Nx=151,
-                                       Nv=20,
-                                       epsilon=1e-2,
-                                       alpha_e=0.75,
-                                       alpha_i=np.sqrt(2 / 1836),
-                                       u_e=0,
-                                       u_i=0,
-                                       L=2 * np.pi,
-                                       dt=1e-2,
-                                       T0=0,
-                                       T=80,
-                                       nu=10,
-                                       Nr=Nr,
-                                       M=M,
-                                       problem_dir="weak_landau",
-                                       Ur_e=np.load("../data/ROM/weak_landau/basis_" + str(M) + ".npy"),
-                                       construct=True,
-                                       ions=False)
+    for alpha_e in [0.5, 0.75]:
+        for M in range(3, 7):
+            for Nr in range(5, 70, 5):
+                setup = SimulationSetupROM(Nx=151,
+                                           Nv=50,
+                                           epsilon=1e-2,
+                                           alpha_e=alpha_e,
+                                           alpha_i=np.sqrt(2 / 1836),
+                                           u_e=0,
+                                           u_i=0,
+                                           L=2 * np.pi,
+                                           dt=1e-2,
+                                           T0=0,
+                                           T=80,
+                                           nu=10,
+                                           Nr=Nr,
+                                           M=M,
+                                           problem_dir="weak_landau",
+                                           Ur_e=np.load("../data/ROM/weak_landau/basis_50/basis_" + str(M) + ".npy"),
+                                           construct=True,
+                                           ions=False)
 
-            # save the reduced operators
-            # setup.save_operators()
+                # save the reduced operators
+                # setup.save_operators()
 
-            # initial condition: read in result from previous simulation
-            y0 = np.zeros(setup.NF + setup.Nr)
-            # first electron 1 species (perturbed)
-            x_ = np.linspace(0, setup.L, setup.Nx, endpoint=False)
-            y0[:setup.Nx] = (1 + setup.epsilon * np.cos(x_)) / setup.alpha_e
-            # ions (unperturbed)
-            C0_ions = np.ones(setup.Nx) / setup.alpha_i
+                # initial condition: read in result from previous simulation
+                y0 = np.zeros(setup.NF + setup.Nr)
+                # first electron 1 species (perturbed)
+                x_ = np.linspace(0, setup.L, setup.Nx, endpoint=False)
+                y0[:setup.Nx] = (1 + setup.epsilon * np.cos(x_)) / setup.alpha_e
+                # ions (unperturbed)
+                C0_ions = np.ones(setup.Nx) / setup.alpha_i
 
-            # start timer
-            start_time_cpu = time.process_time()
-            start_time_wall = time.time()
+                # start timer
+                start_time_cpu = time.process_time()
+                start_time_wall = time.time()
 
-            # integrate (implicit midpoint)
-            sol_midpoint_u = implicit_midpoint_solver_ROM(y_0=y0,
-                                                          right_hand_side=rhs,
-                                                          r_tol=None,
-                                                          a_tol=1e-12,
-                                                          max_iter=100,
-                                                          setup=setup,
-                                                          windowing=False)
+                # integrate (implicit midpoint)
+                sol_midpoint_u = implicit_midpoint_solver_ROM(y_0=y0,
+                                                              right_hand_side=rhs,
+                                                              r_tol=None,
+                                                              a_tol=1e-12,
+                                                              max_iter=100,
+                                                              setup=setup,
+                                                              windowing=False)
 
-            end_time_cpu = time.process_time() - start_time_cpu
-            end_time_wall = time.time() - start_time_wall
+                end_time_cpu = time.process_time() - start_time_cpu
+                end_time_wall = time.time() - start_time_wall
 
-            # make directory
-            if not os.path.exists("../data/ROM/weak_landau/sample_" + str(setup.alpha_e) + "/M" + str(setup.M)):
-                os.makedirs("../data/ROM/weak_landau/sample_" + str(setup.alpha_e) + "/M" + str(setup.M))
+                # make directory
+                if not os.path.exists("../data/ROM/weak_landau/sample_" + str(setup.alpha_e) + "/M" + str(setup.M)):
+                    os.makedirs("../data/ROM/weak_landau/sample_" + str(setup.alpha_e) + "/M" + str(setup.M))
 
-            # ROM performance
-            print("runtime cpu = ", end_time_cpu)
-            print("runtime wall = ", end_time_wall)
-            np.save("../data/ROM/weak_landau/sample_" + str(setup.alpha_e) + "/M" + str(setup.M) + "/sol_midpoint_u_" + str(
-                setup.Nr) + "_nu_" + str(setup.nu) + "_runtime_" + str(setup.T0) + "_" + str(setup.T), np.array([end_time_cpu, end_time_wall]))
+                # ROM performance
+                print("runtime cpu = ", end_time_cpu)
+                print("runtime wall = ", end_time_wall)
+                np.save("../data/ROM/weak_landau/sample_" + str(setup.alpha_e) + "/M" + str(setup.M) + "/sol_ROM_u_" + str(
+                    setup.Nr) + "_runtime_" + str(setup.T0) + "_" + str(setup.T), np.array([end_time_cpu, end_time_wall]))
 
-            # save results
-            np.save("../data/ROM/weak_landau/sample_" + str(setup.alpha_e) + "/M" + str(setup.M) + "/sol_midpoint_u_" + str(
-                setup.Nr) + "_nu_" + str(setup.nu) + "_" + str(setup.T0) + "_" + str(setup.T), sol_midpoint_u)
-            np.save("../data/ROM/weak_landau/sample_" + str(setup.alpha_e) + "/M" + str(setup.M) + "/sol_midpoint_t_" + str(
-                setup.Nr) + "_nu_" + str(setup.nu) + "_" + str(setup.T0) + "_" + str(setup.T), setup.t_vec)
+                # save results
+                np.save("../data/ROM/weak_landau/sample_" + str(setup.alpha_e) + "/M" + str(setup.M) + "/sol_ROM_u_" + str(
+                    setup.Nr) + "_" + str(setup.T0) + "_" + str(setup.T), sol_midpoint_u)
+                np.save("../data/ROM/weak_landau/sample_" + str(setup.alpha_e) + "/M" + str(setup.M) + "/sol_ROM_t_" + str(
+                    setup.Nr) + "_" + str(setup.T0) + "_" + str(setup.T), setup.t_vec)

@@ -28,9 +28,9 @@ def rhs(y):
 
 
 if __name__ == "__main__":
-    for alpha_e in [0.6, 0.7, 0.8, 0.9]:
+    for alpha_e in [0.5, 0.75]:
         setup = SimulationSetupFOM(Nx=151,
-                                   Nv=20,
+                                   Nv=50,
                                    epsilon=1e-2,
                                    alpha_e=alpha_e,
                                    alpha_i=np.sqrt(2 / 1836),
@@ -39,7 +39,7 @@ if __name__ == "__main__":
                                    L=2 * np.pi,
                                    dt=1e-2,
                                    T0=0,
-                                   T=10,
+                                   T=80,
                                    nu=10,
                                    construct_B=False)
 
