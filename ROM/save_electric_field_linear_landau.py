@@ -20,8 +20,8 @@ for M in range(3, 7):
                                    nu=10,
                                    Nr=Nr,
                                    M=M,
-                                   problem_dir="linear_landau",
-                                   Ur_e=np.load("../data/ROM/linear_landau/basis_" + str(M) + ".npy"),
+                                   problem_dir="weak_landau",
+                                   Ur_e=np.load("../data/ROM/weak_landau/basis_" + str(M) + ".npy"),
                                    construct=False,
                                    load=False,
                                    ions=False)
@@ -30,8 +30,8 @@ for M in range(3, 7):
         C0_ions = np.ones(setup.Nx) / setup.alpha_i
 
         # load the simulation results
-        sol_u_reduced = np.load("../data/ROM/linear_landau/sample_" + str(setup.alpha_e) + "/M" + str(setup.M) + "/sol_midpoint_u_" + str(setup.Nr) + "_nu_" + str(setup.nu) + "_" + str(setup.T0) + "_" + str(setup.T) + ".npy")
-        sol_midpoint_t = np.load("../data/ROM/linear_landau/sample_" + str(setup.alpha_e) + "/M" + str(setup.M) + "/sol_midpoint_t_" + str(setup.Nr) + "_nu_" + str(setup.nu) + "_" + str(setup.T0) + "_" + str(setup.T) + ".npy")
+        sol_u_reduced = np.load("../data/ROM/weak_landau/sample_" + str(setup.alpha_e) + "/M" + str(setup.M) + "/sol_midpoint_u_" + str(setup.Nr) + "_nu_" + str(setup.nu) + "_" + str(setup.T0) + "_" + str(setup.T) + ".npy")
+        sol_midpoint_t = np.load("../data/ROM/weak_landau/sample_" + str(setup.alpha_e) + "/M" + str(setup.M) + "/sol_midpoint_t_" + str(setup.Nr) + "_nu_" + str(setup.nu) + "_" + str(setup.T0) + "_" + str(setup.T) + ".npy")
 
         # project back up the reduced simulation results
         sol_u_ROM = np.zeros((setup.Nx*setup.Nv, len(sol_midpoint_t)))
@@ -70,4 +70,4 @@ for M in range(3, 7):
         for ii in range(len(sol_midpoint_t)):
             E1_midpoint[ii] = np.abs(scipy.fft.fft(E_midpoint[:, ii]))[1] / setup.Nx  # normalize fft
 
-        np.save("../data/ROM/linear_landau/sample_" + str(setup.alpha_e) + "/M" + str(setup.M) + "/sol_midpoint_E_" + str(setup.Nr) + "_alpha_" + str(setup.alpha_e) + ".npy", E_midpoint)
+        np.save("../data/ROM/weak_landau/sample_" + str(setup.alpha_e) + "/M" + str(setup.M) + "/sol_midpoint_E_" + str(setup.Nr) + "_alpha_" + str(setup.alpha_e) + ".npy", E_midpoint)

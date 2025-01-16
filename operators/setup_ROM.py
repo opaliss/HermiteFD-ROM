@@ -44,14 +44,10 @@ def kronecker_efficient_2(A, Ur, Nx, Nr, Nv):
     Br = np.zeros((Nr, Nx*Nr))
 
     for col in range(Nr):
+        print("kronecker efficient 2 = ", col)
         for row in range(Nr):
-            for index in range(Nx*Nv):
-                Br[row, col*Nx:col*(Nx+1)] += Ur[index, col] * A[row, index*Nx:index*(Nx+1)]
-
-        # print("kronecker efficient 2=", ii)
-        # A_block = A[:, Nv * Nx * ii: Nv * Nx * (ii + 1)]
-        # U_block = scipy.sparse.kron(Ur[ii * Nv: (ii + 1) * Nv, :], I)
-        # result += A_block @ U_block
+            A_reshaped = A[row, :].reshape(Nx*Nv, Nx)
+            Br[row, col*Nx: Nx*(col + 1)] = Ur[:, col].T * A_reshaped
     return Br
 
 

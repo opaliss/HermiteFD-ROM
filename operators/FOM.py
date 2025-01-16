@@ -44,13 +44,13 @@ def nu_func(n, Nv):
 
 
 def A3(Nx, Nv, i, j):
-    """A3 matrix in linear_landau advection term with nu
+    """A3 matrix in weak_landau advection term with nu
 
     :param i: 0th index (either 0 or M)
     :param j: final index (either M or Nv)
     :param Nv: int, Hermite spectral resolution
     :param Nx: int, finite difference grid resolution
-    :return: 2D matrix, A3 matrix in linear_landau advection term
+    :return: 2D matrix, A3 matrix in weak_landau advection term
     """
     A = np.zeros((j-i, j-i))
     for index, n in enumerate(range(i, j)):
@@ -60,23 +60,23 @@ def A3(Nx, Nv, i, j):
 
 
 def A2(D, i, j):
-    """A2 matrix in linear_landau advection term with u
+    """A2 matrix in weak_landau advection term with u
 
     :param i: 0th index (either 0 or M)
     :param j: final index (either M or Nv)
     :param D: finite difference derivative matrix
-    :return: 2D matrix, A3 matrix in linear_landau advection term
+    :return: 2D matrix, A3 matrix in weak_landau advection term
     """
     return -scipy.sparse.kron(scipy.sparse.identity(n=j-i), D, format="csr")
 
 
 def A1(i, j, D):
-    """A1 matrix in linear_landau advection term with alpha
+    """A1 matrix in weak_landau advection term with alpha
 
     :param i: 0th index (either 0 or M)
     :param j: final index (either M or Nv)
     :param D: finite difference derivative matrix
-    :return: 2D matrix, A1 matrix in linear_landau advection term
+    :return: 2D matrix, A1 matrix in weak_landau advection term
     """
     A = np.zeros((j-i, j-i))
     for index, n in enumerate(range(i, j)):

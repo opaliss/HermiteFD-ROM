@@ -1,4 +1,4 @@
-"""Module to run the adaptive (or non-adaptive) Hermite linear_landau Landau damping full-order model (FOM) testcase
+"""Module to run the adaptive (or non-adaptive) Hermite weak_landau Landau damping full-order model (FOM) testcase
 
 Author: Opal Issan
 Date: May 10th, 2024
@@ -74,15 +74,15 @@ if __name__ == "__main__":
     print("runtime wall = ", end_time_wall)
 
     # make directory
-    if not os.path.exists("../data/FOM/linear_landau/sample_" + str(setup.alpha_e[-1])):
-        os.makedirs("../data/FOM/linear_landau/sample_" + str(setup.alpha_e[-1]))
+    if not os.path.exists("../data/FOM/weak_landau/sample_" + str(setup.alpha_e[-1])):
+        os.makedirs("../data/FOM/weak_landau/sample_" + str(setup.alpha_e[-1]))
 
     # save the runtime
-    np.save("../data/FOM/linear_landau/sample_" + str(setup.alpha_e[-1]) + "/sol_midpoint_u_" + str(setup.Nv) + "_alpha_" + str(setup.alpha_e[-1]) + "_runtime_" + str(setup.T0) + "_" + str(setup.T), np.array([end_time_cpu, end_time_wall]))
+    np.save("../data/FOM/weak_landau/sample_" + str(setup.alpha_e[-1]) + "/sol_midpoint_u_" + str(setup.Nv) + "_alpha_" + str(setup.alpha_e[-1]) + "_runtime_" + str(setup.T0) + "_" + str(setup.T), np.array([end_time_cpu, end_time_wall]))
 
     # save results
-    np.save("../data/FOM/linear_landau/sample_" + str(setup.alpha_e[-1]) + "/sol_adaptive_u_" + str(setup.Nv) + "_alpha_" + str(setup.alpha_e[-1]) + "_" + str(setup.T0) + "_" + str(setup.T), sol_midpoint_u)
-    np.save("../data/FOM/linear_landau/sample_" + str(setup.alpha_e[-1]) + "/sol_adaptive_t_" + str(setup.Nv) + "_alpha_" + str(setup.alpha_e[-1]) + "_" + str(setup.T0) + "_" + str(setup.T), setup.t_vec)
+    np.save("../data/FOM/weak_landau/sample_" + str(setup.alpha_e[-1]) + "/sol_adaptive_u_" + str(setup.Nv) + "_alpha_" + str(setup.alpha_e[-1]) + "_" + str(setup.T0) + "_" + str(setup.T), sol_midpoint_u)
+    np.save("../data/FOM/weak_landau/sample_" + str(setup.alpha_e[-1]) + "/sol_adaptive_t_" + str(setup.Nv) + "_alpha_" + str(setup.alpha_e[-1]) + "_" + str(setup.T0) + "_" + str(setup.T), setup.t_vec)
 
     # save parameters
-    np.save("../data/FOM/linear_landau/sample_" + str(setup.alpha_e[-1]) + "/sol_adaptive_setup_" + str(setup.Nv) + "_alpha_" + str(setup.alpha_e[-1]) + "_" + str(setup.T0) + "_" + str(setup.T), setup)
+    np.save("../data/FOM/weak_landau/sample_" + str(setup.alpha_e[-1]) + "/sol_adaptive_setup_" + str(setup.Nv) + "_alpha_" + str(setup.alpha_e[-1]) + "_" + str(setup.T0) + "_" + str(setup.T), setup)
