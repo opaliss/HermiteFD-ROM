@@ -1,4 +1,4 @@
-"""Module to run the two=stream instability reduced-order model (ROM) testcase
+"""Module to run the two-stream instability reduced-order model (ROM) testcase
 
 Author: Opal Issan
 Date: Jan 9th, 2024
